@@ -1,0 +1,23 @@
+use todo;
+
+DROP TABLE tasks;
+
+
+
+CREATE TABLE IF NOT EXISTS Tasks (
+    ID int NOT NULL AUTO_INCREMENT,
+    Name varchar(255),
+    Status varchar(255),
+    PRIMARY KEY (ID)
+); 
+
+
+
+INSERT INTO Tasks (name, status)
+  VALUES
+    ("task#1", "open"),
+    ("task#2", "open"),
+    ("task#3", "open");
+
+
+
