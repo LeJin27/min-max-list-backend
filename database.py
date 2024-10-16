@@ -4,6 +4,7 @@ import psycopg2
 """
 Used to create a data for all todo related functions 
 
+create_database 
 create_table 
 ---
 Different queries
@@ -17,11 +18,6 @@ read_task_not_done
 
 class TaskDatabase:
     
-
-
-
-
-
     # Use localhost, minmax, postgres, your password, 5432 
     def __init__(self, host, dbname, user, password, port):
         """
@@ -71,13 +67,25 @@ class TaskDatabase:
 
         except Exception as e:
             print(f"Error creating database: {e}")
+    
+
+    
+    def create_task(self, task_desc):
+        """
+        Creates basic task which is automatically set to true. Needs time implementation.
+        """
+
+        self.cursor.execute(f"insert into tasks(task_desc,task_is_open) values('{task_desc}', True)");
+        self.connection.commit()
+
 
 
     
         
 
 
-test = TaskDatabase("localhost", "matthew", "postgres", "dog", 5432)
+test = TaskDatabase("localhost", "minmax", "postgres", "dog", 5432)
+test.create_task("My Little pony")
 
 
 
