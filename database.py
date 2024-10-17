@@ -1,7 +1,6 @@
 import psycopg2
 
 
-
 """
 Used to create a data for all todo related functions 
 
@@ -23,6 +22,7 @@ class TaskDatabase:
         """
         basic connector for database. Should setup table and database if none can be found.
         """
+
         self.dbname = dbname
         self.user = user
         self.password = password
@@ -36,7 +36,10 @@ class TaskDatabase:
             print(f"Database '{self.dbname}' found and connected.")
         except Exception as e:
             if "does not exist" in str(e):
+                # update cursor after new connection
                 self.create_database()
+                self.connection = psycopg2.connect(host=self.host, dbname = self.dbname, user=self.user, password=self.password, port = self.port)
+                self.cursor = self.connection.cursor()
             else: 
                 print("Something really went wrong")
         
@@ -46,13 +49,13 @@ class TaskDatabase:
         self.connection.autocommit = True  
         try:
             self.cursor.execute("""
-                                CREATE TABLE IF NOT EXISTS tasks (
-                                task_id SERIAL PRIMARY KEY, 
-                                task_desc VARCHAR(255), 
-                                task_is_open BOOLEAN,
-                                created_time_stamp TIMESTAMPTZ
-                                );
-                                """)
+                    CREATE TABLE IF NOT EXISTS tasks (
+                    task_id SERIAL PRIMARY KEY, 
+                    task_desc VARCHAR(255), 
+                    task_is_open BOOLEAN,
+                    created_time_stamp TIMESTAMPTZ
+                    );
+                    """)
         except Exception as e:
             print("Something when wrong")
     
@@ -75,17 +78,17 @@ class TaskDatabase:
             print(f"Error creating database: {e}")
     
 
-    # function to create a task given a task description and stores the time it was created
+    
     def create_task(self, task_desc):
         """
         Creates basic task which is automatically set to true. Needs time implementation.
         """
+
         try:
             self.cursor.execute(f"""
-                                insert into tasks(task_desc,task_is_open, created_time_stamp) 
-                                values('{task_desc}', True,CURRENT_TIMESTAMP)
-                                """);
-            
+                    insert into tasks(task_desc,task_is_open, created_time_stamp) 
+                    values('{task_desc}', True,CURRENT_TIMESTAMP)
+                    """);
         except Exception as e:
             print(f"Error creating task: {e}")
         
@@ -96,5 +99,30 @@ class TaskDatabase:
     
 
 
+
+
+    
+
+
+
+
+    
+        
+
+
 test = TaskDatabase("localhost", "minmax", "postgres", "dog", 5432)
 test.create_task("My Little pony")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
