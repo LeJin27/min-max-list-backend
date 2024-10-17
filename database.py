@@ -17,7 +17,6 @@ read_task_not_done
 """
 
 class TaskDatabase:
-    
     # Use localhost, minmax, postgres, your password, 5432 
     def __init__(self, host, dbname, user, password, port):
         """
@@ -44,11 +43,11 @@ class TaskDatabase:
 
         # Creating Table of Tasks
         print("Creating tasks table")
+        self.connection.autocommit = True  
         try:
-            self.cursor.execute("CREATE TABLE IF NOT EXISTS tasks (task_id SERIAL PRIMARY KEY, task_desc VARCHAR(255), task_is_open BOOLEAN);")
+            self.cursor.execute("CREATE TABLE IF NOT EXISTS tasks (task_id SERIAL PRIMARY KEY, task_desc VARCHAR(255), task_is_open BOOLEAN, task_open_timestamp TIMESTAMPTZ);")
         except Exception as e:
             print("Something when wrong")
-        self.connection.commit()
     
 
     def create_database(self):
@@ -75,8 +74,22 @@ class TaskDatabase:
         Creates basic task which is automatically set to true. Needs time implementation.
         """
 
-        self.cursor.execute(f"insert into tasks(task_desc,task_is_open) values('{task_desc}', True)");
+        try:
+            self.cursor.execute(f"insert into tasks(task_desc,task_is_open) values('{task_desc}', True)");
+        except Exception as e:
+            print(f"Error creating task: {e}")
+        
         self.connection.commit()
+
+
+    
+    
+
+
+
+
+    
+
 
 
 
