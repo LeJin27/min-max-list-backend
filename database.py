@@ -87,12 +87,51 @@ class TaskDatabase:
         try:
             self.cursor.execute(f"""
                     insert into tasks(task_desc,task_is_open, created_time_stamp) 
-                    values('{task_desc}', True,CURRENT_TIMESTAMP)
+                    values('{task_desc}', True, CURRENT_TIMESTAMP)
                     """);
         except Exception as e:
             print(f"Error creating task: {e}")
         
         self.connection.commit()
+
+    
+    def read_all_tasks(self):
+        """
+        Reads all tasks in list
+        """
+        try:
+            self.cursor.execute(f"""
+                    select * from tasks
+                    """);
+        except Exception as e:
+            print(f"Error creating task: {e}")
+        
+        self.connection.commit()
+
+        all_tasks = self.cursor.fetchall()
+        return all_tasks
+
+    def read_at_task(self, index):
+        """
+        Reads task at index i
+        """
+        try:
+            self.cursor.execute(f"""
+                    SELECT * FROM tasks WHERE task_id = {index}
+                    """);
+        except Exception as e:
+            print(f"Error creating task: {e}")
+        
+        self.connection.commit()
+
+        all_tasks = self.cursor.fetchall()
+        return all_tasks
+
+
+
+
+
+
 
 
     
@@ -111,7 +150,7 @@ class TaskDatabase:
 
 
 test = TaskDatabase("localhost", "minmax", "postgres", "dog", 5432)
-test.create_task("My Little pony")
+print(test.read_at_task(1))
 
 
 
