@@ -104,7 +104,7 @@ class TaskDatabase:
                     select * from tasks
                     """);
         except Exception as e:
-            print(f"Error creating task: {e}")
+            print(f"Error reading task: {e}")
         
         self.connection.commit()
 
@@ -120,29 +120,28 @@ class TaskDatabase:
                     SELECT * FROM tasks WHERE task_id = {index}
                     """);
         except Exception as e:
-            print(f"Error creating task: {e}")
+            print(f"Error reading task: {e}")
         
         self.connection.commit()
 
         all_tasks = self.cursor.fetchall()
         return all_tasks
 
+    def read_all_is_open_task(self, status):
+        """
+        Reads all tasks with an is open status set to either (True or False)
+        """
+        try:
+            self.cursor.execute(f"""
+                    SELECT * FROM tasks WHERE task_is_open = {status}
+                    """);
 
-
-
-
-
-
-
-    
-    
-
-
-
-
-    
-
-
+        except Exception as e:
+            print(f"Error reading task: {e}")
+        
+        self.connection.commit()
+        all_tasks = self.cursor.fetchall()
+        return all_tasks
 
 
     
@@ -150,7 +149,7 @@ class TaskDatabase:
 
 
 test = TaskDatabase("localhost", "minmax", "postgres", "dog", 5432)
-print(test.read_at_task(1))
+print(test.read_all_is_open_task(True))
 
 
 
