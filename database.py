@@ -81,7 +81,8 @@ class TaskDatabase:
     
     def create_task(self, task_desc):
         """
-        Creates basic task which is automatically set to true. Needs time implementation.
+        Creates basic task which automatically: sets open = true 
+        and has a timestamp for when it was created
         """
 
         try:
@@ -94,6 +95,61 @@ class TaskDatabase:
         
         self.connection.commit()
 
+    def delete_all_tasks(self):
+        """
+        Deletes all tasks from the database
+        """
+        try:
+            self.cursor.execute("""
+            DELETE FROM tasks
+            """)
+            print("Deleted all tasks")
+        except Exception as e:
+            print(f"Error deleting all tasks: {e}")
+
+    def delete_task_by_index(self,index):
+        """
+        Deletes a task from the database using the index
+        """
+        try:
+            # fetches task  useing %s to only catch string type arguments 
+            self.cursor.execute("""
+                SELECT * FROM tasks WHERE task_id = %s
+                """, (index,))
+            task = self.cursor.fetchone()
+
+            #if task found delete otherwise print not found
+            if task:
+                print(f"Deleting task: {task}")
+
+                self.cursor.execute(f"""
+                    DELETE FROM tasks WHERE task_id = %s 
+                    """,(index,))
+            else:
+                print(f"No task found with index: {index}")
+        except Exception as e:
+            print(f"Error deleting task by index: {e}")
+        self.connection.commit()
+
+    def delete_task_by_desc(self,desc):
+        """
+        Deletes a task from the database using the task_desc.
+        Note! deletes all instances of task_desc if there are multiple with the same task_desc
+        """
+        try:
+            self.cursor.execute(f"""
+                    DELETE FROM tasks WHERE task_desc = %s
+                    """,(desc,))
+                    
+            # checks how many rows were deleted and prints it
+            deleted_tasks_number = self.cursor.rowcount
+            print(f"Deleted {deleted_tasks_number} task(s) with description '{desc}'.")
+        except Exception as e:
+            print(f"Error deleting task by desc: {e}")
+            #if there was an error rollback the deletions
+            self.connection.rollback()
+
+        self.connection.commit()
     
     def read_all_tasks(self):
         """
@@ -149,6 +205,15 @@ class TaskDatabase:
 
 
 test = TaskDatabase("localhost", "minmax", "postgres", "dog", 5432)
+
+test.delete_all_tasks()
+test.create_task("Task 1")
+test.create_task("Task 2")
+test.create_task("Task 3")
+test.delete_task_by_index(1)
+test.delete_task_by_desc("Task 2")
+
+
 print(test.read_all_is_open_task(True))
 
 
