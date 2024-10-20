@@ -38,6 +38,7 @@ class TaskDatabase:
             if "does not exist" in str(e):
                 # update cursor after new connection
                 self.create_database()
+                self.connection.close()
                 self.connection = psycopg2.connect(host=self.host, dbname = self.dbname, user=self.user, password=self.password, port = self.port)
                 self.cursor = self.connection.cursor()
             else: 
@@ -50,10 +51,10 @@ class TaskDatabase:
         try:
             self.cursor.execute("""
                     CREATE TABLE IF NOT EXISTS tasks (
-                    task_id SERIAL PRIMARY KEY, 
+                    task_index SERIAL PRIMARY KEY, 
                     task_desc VARCHAR(255), 
                     task_is_open BOOLEAN,
-                    created_time_stamp TIMESTAMPTZ
+                    task_created_time_stamp TIMESTAMPTZ
                     );
                     """)
         except Exception as e:
@@ -86,7 +87,7 @@ class TaskDatabase:
 
         try:
             self.cursor.execute(f"""
-                    insert into tasks(task_desc,task_is_open, created_time_stamp) 
+                    insert into tasks(task_desc,task_is_open, task_created_time_stamp) 
                     values('{task_desc}', True, CURRENT_TIMESTAMP)
                     """);
         except Exception as e:
@@ -117,7 +118,7 @@ class TaskDatabase:
         """
         try:
             self.cursor.execute(f"""
-                    SELECT * FROM tasks WHERE task_id = {index}
+                    SELECT * FROM tasks WHERE task_index = {index}
                     """);
         except Exception as e:
             print(f"Error reading task: {e}")
@@ -130,6 +131,7 @@ class TaskDatabase:
     def read_all_is_open_task(self, status):
         """
         Reads all tasks with an is open status set to either (True or False)
+
         """
         try:
             self.cursor.execute(f"""
@@ -142,14 +144,23 @@ class TaskDatabase:
         self.connection.commit()
         all_tasks = self.cursor.fetchall()
         return all_tasks
+    
+    def __del__(self):
+        print("Closing connection")
+        self.connection.close()
 
+
+#minmax_database = TaskDatabase("localhost", "minmax", "postgres", "dog", 5432)
+#minmax_database.create_task("testing 1")
+#minmax_database.create_task("testing 2")
+#minmax_database.create_task("testing 3")
+#
+#minmax_database.read_all_tasks()
 
     
         
 
 
-test = TaskDatabase("localhost", "minmax", "postgres", "dog", 5432)
-print(test.read_all_is_open_task(True))
 
 
 
