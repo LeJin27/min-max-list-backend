@@ -16,6 +16,14 @@ read_task_done
 read_task_not_done
 """
 
+TASK_PRIMARY_KEY = "task_id"
+TASK_DESCRIPTION = "task_desc"
+TASK_IS_OPEN = "task_is_open "
+TASK_TIME_STAMP = "task_created_time_stamp"
+
+
+
+
 class TaskDatabase:
     # Use localhost, minmax, postgres, your password, 5432 
     def __init__(self, host, dbname, user, password, port):
@@ -49,12 +57,12 @@ class TaskDatabase:
         print("Creating tasks table")
         self.connection.autocommit = True  
         try:
-            self.cursor.execute("""
+            self.cursor.execute(f"""
                     CREATE TABLE IF NOT EXISTS tasks (
-                    task_index SERIAL PRIMARY KEY, 
-                    task_desc VARCHAR(255), 
-                    task_is_open BOOLEAN,
-                    task_created_time_stamp TIMESTAMPTZ
+                    {TASK_PRIMARY_KEY} SERIAL PRIMARY KEY, 
+                    {TASK_DESCRIPTION} VARCHAR(255), 
+                    {TASK_IS_OPEN} BOOLEAN,
+                    {TASK_TIME_STAMP} TIMESTAMPTZ
                     );
                     """)
         except Exception as e:
@@ -87,7 +95,7 @@ class TaskDatabase:
 
         try:
             self.cursor.execute(f"""
-                    insert into tasks(task_desc,task_is_open, task_created_time_stamp) 
+                    insert into tasks({TASK_DESCRIPTION},{TASK_IS_OPEN}, {TASK_TIME_STAMP}) 
                     values('{task_desc}', True, CURRENT_TIMESTAMP)
                     """);
         except Exception as e:
@@ -118,7 +126,7 @@ class TaskDatabase:
         """
         try:
             self.cursor.execute(f"""
-                    SELECT * FROM tasks WHERE task_index = {index}
+                    SELECT * FROM tasks WHERE {TASK_PRIMARY_KEY} = {index}
                     """);
         except Exception as e:
             print(f"Error reading task: {e}")
@@ -135,7 +143,7 @@ class TaskDatabase:
         """
         try:
             self.cursor.execute(f"""
-                    SELECT * FROM tasks WHERE task_is_open = {status}
+                    SELECT * FROM tasks WHERE {TASK_IS_OPEN} = {status}
                     """);
 
         except Exception as e:
@@ -144,18 +152,77 @@ class TaskDatabase:
         self.connection.commit()
         all_tasks = self.cursor.fetchall()
         return all_tasks
+
+
+    def delete_all_tasks(self):
+        """
+        Deletes all tasks from the database
+        """
+        try:
+            self.cursor.execute("""
+            DELETE FROM tasks
+            """)
+            print("Deleted all tasks")
+        except Exception as e:
+            print(f"Error deleting all tasks: {e}")
+
+    def delete_task_by_index(self,index):
+        """
+        Deletes a task from the database using the index
+        """
+        try:
+            # fetches task  useing %s to only catch string type arguments 
+            self.cursor.execute(f"""
+                SELECT * FROM tasks WHERE {TASK_PRIMARY_KEY} = %s
+                """, (index,))
+            task = self.cursor.fetchone()
+
+            #if task found delete otherwise print not found
+            if task:
+                print(f"Deleting task: {task}")
+
+                self.cursor.execute(f"""
+                    DELETE FROM tasks WHERE {TASK_PRIMARY_KEY} = %s 
+                    """,(index,))
+            else:
+                print(f"No task found with index: {index}")
+        except Exception as e:
+            print(f"Error deleting task by index: {e}")
+        self.connection.commit()
+
+    def delete_task_by_desc(self,desc):
+        """
+        Deletes a task from the database using the task_desc.
+        Note! deletes all instances of task_desc if there are multiple with the same task_desc
+        """
+        try:
+            self.cursor.execute(f"""
+                    DELETE FROM tasks WHERE {TASK_DESCRIPTION} = %s
+                    """,(desc,))
+                    
+            # checks how many rows were deleted and prints it
+            deleted_tasks_number = self.cursor.rowcount
+            print(f"Deleted {deleted_tasks_number} task(s) with description '{desc}'.")
+        except Exception as e:
+            print(f"Error deleting task by desc: {e}")
+            #if there was an error rollback the deletions
+            self.connection.rollback()
+
+        self.connection.commit()
     
     def __del__(self):
         print("Closing connection")
         self.connection.close()
 
 
-#minmax_database = TaskDatabase("localhost", "minmax", "postgres", "dog", 5432)
-#minmax_database.create_task("testing 1")
-#minmax_database.create_task("testing 2")
-#minmax_database.create_task("testing 3")
-#
-#minmax_database.read_all_tasks()
+
+minmax_database = TaskDatabase("localhost", "minmax", "postgres", "dog", 5432)
+minmax_database.create_task("Test")
+minmax_database.create_task("Dragon")
+
+
+
+print(minmax_database.read_all_tasks())
 
     
         
