@@ -216,13 +216,13 @@ class TaskDatabase:
 
 
 
-minmax_database = TaskDatabase("localhost", "minmax", "postgres", "dog", 5432)
-minmax_database.create_task("Test")
-minmax_database.create_task("Dragon")
-
-
-
-print(minmax_database.read_all_tasks())
+#minmax_database = TaskDatabase("localhost", "minmax", "postgres", "dog", 5432)
+#minmax_database.create_task("Test")
+#minmax_database.create_task("Dragon")
+#
+#
+#
+#print(minmax_database.read_all_tasks())
 
     
         
