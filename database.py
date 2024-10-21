@@ -214,6 +214,51 @@ class TaskDatabase:
         print("Closing connection")
         self.connection.close()
 
+    def update_task(self, task_id, new_desc=None, new_status=None):
+        """
+        Updates a task's description, status, or both based on the task_id.
+        """
+        try:
+            # Update both description and status if both are provided
+            if new_desc is not None and new_status is not None:
+                self.cursor.execute(f"""
+                    UPDATE tasks
+                    SET {TASK_DESCRIPTION} = %s, {TASK_IS_OPEN} = %s
+                    WHERE {TASK_PRIMARY_KEY} = %s
+                    """, (new_desc, new_status, task_id))
+            
+            # Update only the description if provided
+            elif new_desc is not None:
+                self.cursor.execute(f"""
+                    UPDATE tasks
+                    SET {TASK_DESCRIPTION} = %s
+                    WHERE {TASK_PRIMARY_KEY} = %s
+                    """, (new_desc, task_id))
+            
+            # Update only the status if provided
+            elif new_status is not None:
+                self.cursor.execute(f"""
+                    UPDATE tasks
+                    SET {TASK_IS_OPEN} = %s
+                    WHERE {TASK_PRIMARY_KEY} = %s
+                    """, (new_status, task_id))
+            
+            else:
+                print("No changes specified for update.")
+                return
+            
+            # Commit the transaction and print success message
+            self.connection.commit()
+            print(f"Task with ID {task_id} updated successfully.")
+
+        except Exception as e:
+            # Handle any errors and rollback changes if necessary
+            print(f"Error updating task with ID {task_id}: {e}")
+            self.connection.rollback()
+
+
+
+
 
 
 #minmax_database = TaskDatabase("localhost", "minmax", "postgres", "dog", 5432)
