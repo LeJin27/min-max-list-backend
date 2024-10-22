@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from database import TaskDatabase
 from typing import Optional
+from pydantic import BaseModel
 
 minmax_database = TaskDatabase("localhost", "minmax", "postgres", "dog", 5432)
 print(minmax_database.read_all_is_open_task(True))
@@ -36,7 +37,19 @@ async def read_tasks(is_open: Optional[bool] = None):
 
     return minmax_database.read_all_tasks()
 
+class Item(BaseModel):
+    name: str
+    description: Optional[str] = None
+    price: float
+    tax: Optional[float] = None
 
+@app.post("/items/")
+async def create_item(item: Item):
+    item_dict = item.dict()
+    if item.tax:
+        price_with_tax = item.price + item.tax
+        item_dict.update({"price_with_tax": price_with_tax})
+    return item_dict
 
 
 
