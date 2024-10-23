@@ -97,7 +97,7 @@ class TaskDatabase:
             self.cursor.execute(f"""
                     insert into tasks({TASK_DESCRIPTION},{TASK_IS_OPEN}, {TASK_TIME_STAMP}) 
                     values('{task_desc}', True, CURRENT_TIMESTAMP)
-                    """);
+                    """)
         except Exception as e:
             print(f"Error creating task: {e}")
         
@@ -111,7 +111,7 @@ class TaskDatabase:
         try:
             self.cursor.execute(f"""
                     select * from tasks
-                    """);
+                    """)
         except Exception as e:
             print(f"Error reading task: {e}")
         
@@ -127,7 +127,7 @@ class TaskDatabase:
         try:
             self.cursor.execute(f"""
                     SELECT * FROM tasks WHERE {TASK_PRIMARY_KEY} = {index}
-                    """);
+                    """)
         except Exception as e:
             print(f"Error reading task: {e}")
         
@@ -144,7 +144,7 @@ class TaskDatabase:
         try:
             self.cursor.execute(f"""
                     SELECT * FROM tasks WHERE {TASK_IS_OPEN} = {status}
-                    """);
+                    """)
 
         except Exception as e:
             print(f"Error reading task: {e}")
@@ -214,9 +214,9 @@ class TaskDatabase:
         print("Closing connection")
         self.connection.close()
 
-    def update_task(self, task_id, new_desc=None, new_status=None):
+    def update_task(self, index, new_desc=None, new_status=None):
         """
-        Updates a task's description, status, or both based on the task_id.
+        Updates a task's description, status, or both based on the index.
         """
         try:
             # Update both description and status if both are provided
@@ -225,7 +225,7 @@ class TaskDatabase:
                     UPDATE tasks
                     SET {TASK_DESCRIPTION} = %s, {TASK_IS_OPEN} = %s
                     WHERE {TASK_PRIMARY_KEY} = %s
-                    """, (new_desc, new_status, task_id))
+                    """, (new_desc, new_status, index))
             
             # Update only the description if provided
             elif new_desc is not None:
@@ -233,7 +233,7 @@ class TaskDatabase:
                     UPDATE tasks
                     SET {TASK_DESCRIPTION} = %s
                     WHERE {TASK_PRIMARY_KEY} = %s
-                    """, (new_desc, task_id))
+                    """, (new_desc, index))
             
             # Update only the status if provided
             elif new_status is not None:
@@ -241,7 +241,7 @@ class TaskDatabase:
                     UPDATE tasks
                     SET {TASK_IS_OPEN} = %s
                     WHERE {TASK_PRIMARY_KEY} = %s
-                    """, (new_status, task_id))
+                    """, (new_status, index))
             
             else:
                 print("No changes specified for update.")
@@ -249,14 +249,12 @@ class TaskDatabase:
             
             # Commit the transaction and print success message
             self.connection.commit()
-            print(f"Task with ID {task_id} updated successfully.")
+            print(f"Task at index {index} updated successfully.")
 
         except Exception as e:
             # Handle any errors and rollback changes if necessary
-            print(f"Error updating task with ID {task_id}: {e}")
+            print(f"Error updating task at index {index}: {e}")
             self.connection.rollback()
-
-
 
 
 
