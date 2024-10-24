@@ -42,14 +42,14 @@ app.add_middleware(
 )
 
 
-@app.post("/tasks/")
-async def create_task(task: Task):
+@app.post("/tasks/", response_model=Task)
+async def create_task(task: Task ):
     user_db.create_task(task.task_desc)
 
     all_tasks = user_db.read_all_tasks()
     most_recent_task = helper_tuple_to_task_base_model(all_tasks)[-1]
 
-    # return most recent id of task to keep track of id in front end
+    # return most recent task infomration to keep track of files 
     return most_recent_task
 
 # tasks/?is_completed=True
