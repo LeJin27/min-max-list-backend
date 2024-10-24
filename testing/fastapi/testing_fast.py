@@ -19,7 +19,7 @@ http://127.0.0.1:8000/tasks/{index}             //returns task at index
 """
 @app.get("/tasks/{index}")
 async def read_tasks_id(index:int):
-    return minmax_database.read_at_task(index)
+    return minmax_database.read_at_task_id(index)
 
 
 """
@@ -28,9 +28,9 @@ http://127.0.0.1:8000/tasks/?is_open=False     //Returns all taks that are close
 """
 
 @app.get("/tasks")
-async def read_tasks(is_open: Optional[bool] = None):
-    if is_open is not None:
-        if (is_open):
+async def read_tasks(task_is_completed: Optional[bool] = None):
+    if task_is_completed is not None:
+        if (task_is_completed):
             return minmax_database.read_all_is_open_task(True)
         else: 
             return minmax_database.read_all_is_open_task(False)
