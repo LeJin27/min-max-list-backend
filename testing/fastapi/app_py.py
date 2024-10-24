@@ -1,22 +1,14 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List
-from task_database import TaskDatabase  # Ensure your TaskDatabase class is in this module
+from database import TaskDatabase  # Ensure your TaskDatabase class is in this module
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
 from datetime import datetime
 from fastapi.responses import JSONResponse
-from fastapi.middleware.cors import CORSMiddleware
 
 USER_DATABASE_NAME = 'minmax'
 TASK_SCHEMA = ["task_id", "task_desc", "task_is_completed", "task_created_time_stamp"]
-
-# frontend SHOULD not modify task_id and created_time
-class Task(BaseModel):
-    task_id: int = None  
-    task_desc: str
-    task_is_completed: bool
-    task_created_time_stamp: datetime = None
 
 # convert a list of tuples to base model of task_schema
 def helper_tuple_to_task_base_model(list_of_tuples):
@@ -33,24 +25,18 @@ app = FastAPI()
 user_db = TaskDatabase(host='localhost', dbname=USER_DATABASE_NAME, user='postgres', password='dog', port=5432)
 #-----------------
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # You can specify specific origins instead of "*" for security
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
+# frontend SHOULD not modify task_id and created_time
+class Task(BaseModel):
+    task_id: int = None  
+    task_desc: str
+    task_is_completed: bool
+    task_created_time_stamp: datetime = None
 
 @app.post("/tasks/")
 async def create_task(task: Task):
     user_db.create_task(task.task_desc)
-
-    all_tasks = user_db.read_all_tasks()
-    most_recent_task = helper_tuple_to_task_base_model(all_tasks)[-1]
-
-    # return most recent id of task to keep track of id in front end
-    return most_recent_task
+    return JSONResponse(content={"message": "Task created successfully"}, status_code=201)
 
 # tasks/?is_completed=True
 # tasks/?is_completed=false
