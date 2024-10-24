@@ -18,8 +18,8 @@ read_task_not_done
 
 TASK_PRIMARY_KEY = "task_id"
 TASK_DESCRIPTION = "task_desc"
-TASK_IS_OPEN = "task_is_open "
-TASK_TIME_STAMP = "task_created_time_stamp"
+TASK_IS_COMPLETED = "task_is_completed"
+TASK_CREATED_TIME_STAMP = "task_created_time_stamp"
 
 
 
@@ -53,6 +53,11 @@ class TaskDatabase:
                 print("Something really went wrong")
         
 
+        self.create_table()
+        
+
+    
+    def create_table(self):
         # Creating Table of Tasks
         print("Creating tasks table")
         self.connection.autocommit = True  
@@ -61,8 +66,8 @@ class TaskDatabase:
                     CREATE TABLE IF NOT EXISTS tasks (
                     {TASK_PRIMARY_KEY} SERIAL PRIMARY KEY, 
                     {TASK_DESCRIPTION} VARCHAR(255), 
-                    {TASK_IS_OPEN} BOOLEAN,
-                    {TASK_TIME_STAMP} TIMESTAMPTZ
+                    {TASK_IS_COMPLETED} BOOLEAN,
+                    {TASK_CREATED_TIME_STAMP} TIMESTAMPTZ
                     );
                     """)
         except Exception as e:
@@ -90,14 +95,14 @@ class TaskDatabase:
     
     def create_task(self, task_desc):
         """
-        Creates basic task which is automatically set to true. Needs time implementation.
+        Creates basic task which is automatically set to false completed. Needs time implementation.
         """
 
         try:
             self.cursor.execute(f"""
-                    insert into tasks({TASK_DESCRIPTION},{TASK_IS_OPEN}, {TASK_TIME_STAMP}) 
-                    values('{task_desc}', True, CURRENT_TIMESTAMP)
-                    """)
+                    insert into tasks({TASK_DESCRIPTION},{TASK_IS_COMPLETED}, {TASK_CREATED_TIME_STAMP}) 
+                    values('{task_desc}', False, CURRENT_TIMESTAMP)
+                    """);
         except Exception as e:
             print(f"Error creating task: {e}")
         
@@ -111,7 +116,7 @@ class TaskDatabase:
         try:
             self.cursor.execute(f"""
                     select * from tasks
-                    """)
+                    """);
         except Exception as e:
             print(f"Error reading task: {e}")
         
@@ -120,14 +125,14 @@ class TaskDatabase:
         all_tasks = self.cursor.fetchall()
         return all_tasks
 
-    def read_at_task(self, index):
+    def read_at_task_id(self, index):
         """
         Reads task at index i
         """
         try:
             self.cursor.execute(f"""
                     SELECT * FROM tasks WHERE {TASK_PRIMARY_KEY} = {index}
-                    """)
+                    """);
         except Exception as e:
             print(f"Error reading task: {e}")
         
@@ -136,15 +141,15 @@ class TaskDatabase:
         all_tasks = self.cursor.fetchall()
         return all_tasks
 
-    def read_all_is_open_task(self, status):
+    def read_tasks_with_status(self, status):
         """
         Reads all tasks with an is open status set to either (True or False)
 
         """
         try:
             self.cursor.execute(f"""
-                    SELECT * FROM tasks WHERE {TASK_IS_OPEN} = {status}
-                    """)
+                    SELECT * FROM tasks WHERE {TASK_IS_COMPLETED} = {status}
+                    """);
 
         except Exception as e:
             print(f"Error reading task: {e}")
@@ -214,18 +219,18 @@ class TaskDatabase:
         print("Closing connection")
         self.connection.close()
 
-    def update_task(self, index, new_desc=None, new_status=None):
+    def update_task(self, task_id, new_desc=None, new_status=None):
         """
-        Updates a task's description, status, or both based on the index.
+        Updates a task's description, status, or both based on the task_id.
         """
         try:
             # Update both description and status if both are provided
             if new_desc is not None and new_status is not None:
                 self.cursor.execute(f"""
                     UPDATE tasks
-                    SET {TASK_DESCRIPTION} = %s, {TASK_IS_OPEN} = %s
+                    SET {TASK_DESCRIPTION} = %s, {TASK_IS_COMPLETED} = %s
                     WHERE {TASK_PRIMARY_KEY} = %s
-                    """, (new_desc, new_status, index))
+                    """, (new_desc, new_status, task_id))
             
             # Update only the description if provided
             elif new_desc is not None:
@@ -233,15 +238,15 @@ class TaskDatabase:
                     UPDATE tasks
                     SET {TASK_DESCRIPTION} = %s
                     WHERE {TASK_PRIMARY_KEY} = %s
-                    """, (new_desc, index))
+                    """, (new_desc, task_id))
             
             # Update only the status if provided
             elif new_status is not None:
                 self.cursor.execute(f"""
                     UPDATE tasks
-                    SET {TASK_IS_OPEN} = %s
+                    SET {TASK_IS_COMPLETED} = %s
                     WHERE {TASK_PRIMARY_KEY} = %s
-                    """, (new_status, index))
+                    """, (new_status, task_id))
             
             else:
                 print("No changes specified for update.")
@@ -249,23 +254,26 @@ class TaskDatabase:
             
             # Commit the transaction and print success message
             self.connection.commit()
-            print(f"Task at index {index} updated successfully.")
+            print(f"Task with ID {task_id} updated successfully.")
 
         except Exception as e:
             # Handle any errors and rollback changes if necessary
-            print(f"Error updating task at index {index}: {e}")
+            print(f"Error updating task with ID {task_id}: {e}")
             self.connection.rollback()
 
 
 
 
-#minmax_database = TaskDatabase("localhost", "minmax", "postgres", "dog", 5432)
+
+minmax_database = TaskDatabase("localhost", "minmax", "postgres", "dog", 5432)
 #minmax_database.create_task("Test")
-#minmax_database.create_task("Dragon")
+#minmax_database.create_task("Dog")
+#listTest = minmax_database.read_tasks_with_status(False)
 #
 #
 #
-#print(minmax_database.read_all_tasks())
+#for x in listTest:
+#    print(x)
 
     
         
