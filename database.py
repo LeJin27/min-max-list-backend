@@ -198,6 +198,10 @@ class TaskDatabase:
         self.connection.commit()
         all_tasks = self.cursor.fetchall()
         return all_tasks
+    
+    def __del__(self):
+        print("Closing connection")
+        self.connection.close()
 
 
     
