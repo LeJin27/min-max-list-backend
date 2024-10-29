@@ -13,3 +13,7 @@
 ### Usage
 - run in terminal:
     - fastapi dev app.py
+
+### Files
+- app.py: Contains main app along with fastapi crud commands 
+- task_database.py: Main back end interface used in crud commands
