@@ -1,15 +1,13 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends, Header
 from pydantic import BaseModel
-from typing import List
-from task_database import TaskDatabase  # Ensure your TaskDatabase class is in this module
+from typing import List, Optional
+from task_database import TaskDatabase # Ensure your TaskDatabase class is in this module
 from fastapi.middleware.cors import CORSMiddleware
-from typing import Optional
 from datetime import datetime
 from fastapi.responses import JSONResponse
-from fastapi.middleware.cors import CORSMiddleware
 
 USER_DATABASE_NAME = 'minmax'
-TASK_SCHEMA = ["task_id", "task_desc", "task_is_completed", "task_created_time_stamp"]
+TASK_SCHEMA = ["task_id", "task_desc", "task_is_completed", "task_created_time_stamp", "user_id"]
 
 # frontend SHOULD not modify task_id and created_time
 class Task(BaseModel):
@@ -25,6 +23,13 @@ def helper_tuple_to_task_base_model(list_of_tuples):
     # converts dictionary of tasks to our Pydantic Model 
     pydantic_tasks = [Task(**task_dict) for task_dict in dict_tasks]
     return pydantic_tasks
+
+# Dependency to verify Firebase token
+async def get_current_user(id_token: Optional[str] = Header(None)):
+    user_id = TaskDatabase.verify_user_token(id_token)
+    if user_id is None:
+        raise HTTPException(status_code=401, detail="Invalid or missing Firebase token")
+    return user_id
 
 
 # MAIN APP 
@@ -43,10 +48,10 @@ app.add_middleware(
 
 
 @app.post("/tasks/", response_model=Task)
-async def create_task(task: Task ):
-    user_db.create_task(task.task_desc)
+async def create_task(task: Task, user_id: str = Depends(get_current_user)):
+    user_db.create_user_task(task.task_desc, user_id=user_id)
 
-    all_tasks = user_db.read_all_tasks()
+    all_tasks = user_db.read_user_tasks()
     most_recent_task = helper_tuple_to_task_base_model(all_tasks)[-1]
 
     # return most recent task infomration to keep track of files 
@@ -55,32 +60,29 @@ async def create_task(task: Task ):
 # tasks/?is_completed=True
 # tasks/?is_completed=false
 @app.get("/tasks/", response_model=List[Task])
-async def read_tasks(task_is_completed: Optional[bool] = None):
+async def read_tasks(task_is_completed: Optional[bool] = None, user_id: str = Depends(get_current_user)):
 
     if task_is_completed is not None:
-        if (task_is_completed):
-            returned_tasks = user_db.read_tasks_with_status(True)
-        else: 
-            returned_tasks = user_db.read_tasks_with_status(False)
+        returned_tasks = user_db.read_user_tasks_with_status(task_is_completed)
     else:
-        returned_tasks = user_db.read_all_tasks()
+        returned_tasks = user_db.read_user_tasks(user_id)
 
     # convert list of tuples to json
     returned_json = helper_tuple_to_task_base_model(returned_tasks)
     return returned_json
 
 @app.get("/tasks/{task_id}", response_model=List[Task])
-async def read_task_id(task_id:int):
-    returned_json = user_db.read_at_task_id(task_id)
+async def read_task_id(task_id:int, user_id: str = Depends(get_current_user)):
+    returned_json = user_db.read_user_task_id(task_id, user_id)
     return helper_tuple_to_task_base_model(returned_json)
 
 
 @app.put("/tasks/{task_id}")
-async def update_task(task_id: int, task: Task):
-    user_db.update_task(task_id, new_desc=task.task_desc, new_status=task.task_is_completed)
+async def update_task(task_id: int, task: Task, user_id: str = Depends(get_current_user)):
+    user_db.update_user_task(task_id, new_desc=task.task_desc, new_status=task.task_is_completed, user_id=user_id)
     return JSONResponse(content={"message": "Task updated successfully"}, status_code=201)
 
 @app.delete("/tasks/{task_id}")
-async def delete_task(task_id: int):
-    user_db.delete_task_by_index(task_id)
+async def delete_task(task_id: int, user_id: str = Depends(get_current_user)):
+    user_db.delete_user_task_by_index(task_id, user_id)
     return JSONResponse(content={"message": "Task deleted successfully"}, status_code=201)
