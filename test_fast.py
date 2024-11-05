@@ -10,7 +10,6 @@ from pydantic import BaseModel
 minmax_database = TaskDatabase("localhost", "minmax", "postgres", "dog", 5432)
 app = FastAPI()
 
-
 class Item(BaseModel):
     name: str
     description: Optional[str] = None
