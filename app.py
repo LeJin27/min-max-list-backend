@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from typing import List, Optional
 from task_database import TaskDatabase # Ensure your TaskDatabase class is in this module
 from fastapi.middleware.cors import CORSMiddleware
-from datetime import datetime
+from datetime import datetime, timedelta
 from fastapi.responses import JSONResponse
 
 USER_DATABASE_NAME = 'minmax'
@@ -76,7 +76,6 @@ async def read_task_id(task_id:int, user_id: str = Depends(get_current_user)):
     returned_json = user_db.read_user_task_id(task_id, user_id)
     return helper_tuple_to_task_base_model(returned_json)
 
-
 @app.put("/tasks/{task_id}")
 async def update_task(task_id: int, task: Task, user_id: str = Depends(get_current_user)):
     user_db.update_user_task(task_id, new_desc=task.task_desc, new_status=task.task_is_completed, user_id=user_id)
@@ -86,3 +85,37 @@ async def update_task(task_id: int, task: Task, user_id: str = Depends(get_curre
 async def delete_task(task_id: int, user_id: str = Depends(get_current_user)):
     user_db.delete_user_task_by_index(task_id, user_id)
     return JSONResponse(content={"message": "Task deleted successfully"}, status_code=201)
+
+
+
+@app.get("/stats/weekly_created")
+async def weekly_created_stats(user_id: str = Depends(get_current_user)):
+    created_last_week = user_db.get_tasks_created_last_week(user_id)
+    return {"tasks_created_last_week": created_last_week}
+
+@app.get("/stats/weekly_completed")
+async def weekly_completed_stats(user_id: str = Depends(get_current_user)):
+    completed_last_week = user_db.get_tasks_completed_last_week(user_id)
+    return {"tasks_completed_last_week": completed_last_week}
+
+@app.get("/stats/weekly_created_completed")
+async def weekly_created_completed_stats(start_date: date, user_id: str = Depends(get_current_user)):
+    stats = user_db.get_tasks_created_and_completed_week(user_id, start_date)
+    return stats
+
+@app.get("/stats/monthly_created")
+async def monthly_created_stats(user_id: str = Depends(get_current_user)):
+    created_last_month = user_db.get_tasks_created_last_month(user_id)
+    return {"tasks_created_last_month": created_last_month}
+
+@app.get("/stats/monthly_completed")
+async def monthly_completed_stats(user_id: str = Depends(get_current_user)):
+    completed_last_month = user_db.get_tasks_completed_last_month(user_id)
+    return {"tasks_completed_last_month": completed_last_month}
+
+@app.get("/stats/monthly_created_completed")
+async def monthly_created_completed_stats(month: int, year: int, user_id: str = Depends(get_current_user)):
+    stats = user_db.get_tasks_created_and_completed_month(user_id, month, year)
+    return stats
+
+

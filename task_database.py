@@ -6,6 +6,7 @@ cred = credentials.Certificate("/Users/pujitha/Downloads/to-do-list.json")
 firebase_admin.initialize_app(cred)
 
 import psycopg2
+from datetime import datetime, timedelta
 
 """
 Used to create a data for all todo related functions 
@@ -397,6 +398,132 @@ class TaskDatabase:
         except Exception as e:
             print(f"Error updating task with ID {task_id}: {e}")
             self.connection.rollback()
+
+    def get_tasks_created_last_week(self, user_id):
+        """Gets the count of tasks created in the last week for a specific user."""
+
+        try:
+            last_week = datetime.now() - timedelta(days=7)
+            self.cursor.execute(f"""
+                SELECT COUNT(*) FROM tasks 
+                WHERE {USER_ID} = %s AND {TASK_CREATED_TIME_STAMP} >= %s;
+            """, (user_id, last_week))
+            created_count = self.cursor.fetchone()[0]
+            return created_count
+        
+        except Exception as e:
+            print(f"Error fetching tasks created in last week: {e}")
+            return None
+
+    def get_tasks_completed_last_week(self, user_id):
+        """Gets the count of tasks completed in the last week for a specific user."""
+
+        try:
+            last_week = datetime.now() - timedelta(days=7)
+            self.cursor.execute(f"""
+                SELECT COUNT(*) FROM tasks 
+                WHERE {USER_ID} = %s AND {TASK_IS_COMPLETED} = TRUE 
+                AND {TASK_CREATED_TIME_STAMP} >= %s;
+            """, (user_id, last_week))
+            completed_count = self.cursor.fetchone()[0]
+            return completed_count
+        
+        except Exception as e:
+            print(f"Error fetching tasks completed in last week: {e}")
+            return None
+        
+    def get_tasks_created_and_completed_week(self, user_id, start_date):
+        """Gets counts of tasks created and completed in a given week for a specific user."""
+
+        try:
+            end_date = start_date + timedelta(days=7)
+
+            # Tasks created in the specified week
+            self.cursor.execute(f"""
+                SELECT COUNT(*) FROM tasks 
+                WHERE {USER_ID} = %s AND {TASK_CREATED_TIME_STAMP} >= %s 
+                AND {TASK_CREATED_TIME_STAMP} < %s;
+            """, (user_id, start_date, end_date))
+            created_count = self.cursor.fetchone()[0]
+
+            # Tasks completed in the specified week
+            self.cursor.execute(f"""
+                SELECT COUNT(*) FROM tasks 
+                WHERE {USER_ID} = %s AND {TASK_IS_COMPLETED} = TRUE 
+                AND {TASK_CREATED_TIME_STAMP} >= %s AND {TASK_CREATED_TIME_STAMP} < %s;
+            """, (user_id, start_date, end_date))
+            completed_count = self.cursor.fetchone()[0]
+
+            return {"tasks_created": created_count, "tasks_completed": completed_count}
+        
+        except Exception as e:
+            print(f"Error fetching tasks for week starting on {start_date}: {e}")
+            return None
+
+
+    def get_tasks_created_last_month(self, user_id):
+        """Gets the count of tasks created in the last month for a specific user."""
+
+        try:
+            last_month = datetime.now() - timedelta(days=30)
+            self.cursor.execute(f"""
+                SELECT COUNT(*) FROM tasks 
+                WHERE {USER_ID} = %s AND {TASK_CREATED_TIME_STAMP} >= %s;
+            """, (user_id, last_month))
+            task_count = self.cursor.fetchone()[0]
+            return task_count
+        
+        except Exception as e:
+            print(f"Error fetching tasks created in last month: {e}")
+            return None
+        
+    def get_tasks_completed_last_month(self, user_id):
+        """Gets the count of tasks completed in the last month for a specific user."""
+
+        try:
+            last_month = datetime.now() - timedelta(days=30)
+            self.cursor.execute(f"""
+                SELECT COUNT(*) FROM tasks 
+                WHERE {USER_ID} = %s AND {TASK_IS_COMPLETED} = TRUE 
+                AND {TASK_CREATED_TIME_STAMP} >= %s;
+            """, (user_id, last_month))
+            completed_count = self.cursor.fetchone()[0]
+            return completed_count
+        
+        except Exception as e:
+            print(f"Error fetching tasks completed in last month: {e}")
+            return None
+        
+    def get_tasks_created_and_completed_month(self, user_id, month, year):
+        """Gets counts of tasks created and completed in a given month for a specific user."""
+
+        try:
+            start_date = datetime(year, month, 1)
+            end_date = (start_date + timedelta(days=31)).replace(day=1)  # First day of the next month
+            
+            # Tasks created in the specified month
+            self.cursor.execute(f"""
+                SELECT COUNT(*) FROM tasks 
+                WHERE {USER_ID} = %s AND {TASK_CREATED_TIME_STAMP} >= %s 
+                AND {TASK_CREATED_TIME_STAMP} < %s;
+            """, (user_id, start_date, end_date))
+            created_count = self.cursor.fetchone()[0]
+
+            # Tasks completed in the specified month
+            self.cursor.execute(f"""
+                SELECT COUNT(*) FROM tasks 
+                WHERE {USER_ID} = %s AND {TASK_IS_COMPLETED} = TRUE 
+                AND {TASK_CREATED_TIME_STAMP} >= %s AND {TASK_CREATED_TIME_STAMP} < %s;
+            """, (user_id, start_date, end_date))
+            completed_count = self.cursor.fetchone()[0]
+
+            return {"tasks_created": created_count, "tasks_completed": completed_count}
+        except Exception as e:
+            print(f"Error fetching tasks for month {month}/{year}: {e}")
+            return None
+
+
+    
 
 
 
