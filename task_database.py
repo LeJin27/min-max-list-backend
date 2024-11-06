@@ -18,11 +18,11 @@ read_task_not_done
 """
 
 TASK_PRIMARY_KEY = "task_id"
+TASK_UID = "task_uid"
 TASK_DESCRIPTION = "task_desc"
 TASK_IS_COMPLETED = "task_is_completed"
 TASK_CREATED_TIME_STAMP = "task_created_time_stamp"
 TASK_ALARM_TIME = "task_alarm_time"
-TASK_UID = "task_uid"
 
 
 
@@ -68,12 +68,11 @@ class TaskDatabase:
             self.cursor.execute(f"""
                     CREATE TABLE IF NOT EXISTS tasks (
                     {TASK_PRIMARY_KEY} SERIAL PRIMARY KEY, 
+                    {TASK_UID} VARCHAR(255),
                     {TASK_DESCRIPTION} VARCHAR(255), 
                     {TASK_IS_COMPLETED} BOOLEAN,
                     {TASK_CREATED_TIME_STAMP} TIMESTAMPTZ,
-                    {TASK_ALARM_TIME} TIMESTAMPTZ,
-                    {TASK_UID} VARCHAR(255)
-
+                    {TASK_ALARM_TIME} TIMESTAMPTZ
                     );
                     """)
         except Exception as e:
@@ -99,7 +98,7 @@ class TaskDatabase:
     
 
     
-    def create_task(self, task_desc, task_alarm_time=None, uid=None):
+    def create_task(self, task_uid, task_desc, task_alarm_time=None):
         """
         Creates basic task which is automatically set to false completed. Needs time implementation.
         """
@@ -116,27 +115,22 @@ class TaskDatabase:
 
 
             self.cursor.execute(f"""
-                INSERT INTO tasks({TASK_DESCRIPTION}, {TASK_IS_COMPLETED}, {TASK_CREATED_TIME_STAMP},{TASK_ALARM_TIME}, {TASK_UID})
-                VALUES(%s, %s, CURRENT_TIMESTAMP,%s, %s);
-            """, (task_desc, False, task_alarm_time, uid))
+                INSERT INTO tasks({TASK_UID}, {TASK_DESCRIPTION}, {TASK_IS_COMPLETED}, {TASK_CREATED_TIME_STAMP},{TASK_ALARM_TIME})
+                VALUES (%s, %s, %s, CURRENT_TIMESTAMP, %s);
+            """, (task_uid, task_desc, False, task_alarm_time))
         except Exception as e:
             print(f"Error creating task: {e}")
         
         self.connection.commit()
 
-    def read_all_tasks(self, uid=None):
+    def read_all_tasks(self, task_uid):
         """
         Reads all tasks in list, optionally filtered by uid.
         """
         try:
-            if uid:
-                self.cursor.execute(f"""
-                        SELECT * FROM tasks WHERE {TASK_UID} = %s
-                        """, (uid,))
-            else:
-                self.cursor.execute(f"""
-                        SELECT * FROM tasks
-                        """)
+            self.cursor.execute(f"""
+                    SELECT * FROM tasks WHERE {TASK_UID} = %s
+                    """, (task_uid,))
         except Exception as e:
             print(f"Error reading tasks: {e}")
     
@@ -162,19 +156,14 @@ class TaskDatabase:
         return all_tasks
 
 
-    def read_tasks_with_status(self, status, uid=None):
+    def read_tasks_with_status(self, task_uid, status):
         """
         Reads all tasks with an is open status set to either (True or False), optionally filtered by uid.
         """
         try:
-            if uid:
-                self.cursor.execute(f"""
-                        SELECT * FROM tasks WHERE {TASK_IS_COMPLETED} = %s AND {TASK_UID} = %s
-                        """, (status, uid))
-            else:
-                self.cursor.execute(f"""
-                        SELECT * FROM tasks WHERE {TASK_IS_COMPLETED} = %s
-                        """, (status,))
+            self.cursor.execute(f"""
+                    SELECT * FROM tasks WHERE {TASK_IS_COMPLETED} = %s AND {TASK_UID} = %s
+                    """, (status, task_uid))
         except Exception as e:
             print(f"Error reading task: {e}")
 
@@ -239,7 +228,7 @@ class TaskDatabase:
 
         self.connection.commit()
 
-    def update_task(self, task_id, uid, new_desc=None, new_status=None, new_alarm_time=None):
+    def update_task(self, task_id, task_uid, new_desc=None, new_status=None, new_alarm_time=None):
         """
         Updates a task's description, status, or both based on the task_id and uid.
         """
@@ -250,7 +239,7 @@ class TaskDatabase:
                     UPDATE tasks
                     SET {TASK_DESCRIPTION} = %s, {TASK_IS_COMPLETED} = %s, {TASK_ALARM_TIME} = %s
                     WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s
-                    """, (new_desc, new_status, new_alarm_time, task_id, uid))
+                    """, (new_desc, new_status, new_alarm_time, task_id, task_uid))
 
             # Update description and status
             elif new_desc is not None and new_status is not None:
@@ -258,7 +247,7 @@ class TaskDatabase:
                     UPDATE tasks
                     SET {TASK_DESCRIPTION} = %s, {TASK_IS_COMPLETED} = %s
                     WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s
-                    """, (new_desc, new_status, task_id, uid))
+                    """, (new_desc, new_status, task_id, task_uid))
 
             # Update description and alarm time
             elif new_desc is not None and new_alarm_time is not None:
@@ -266,7 +255,7 @@ class TaskDatabase:
                     UPDATE tasks
                     SET {TASK_DESCRIPTION} = %s, {TASK_ALARM_TIME} = %s
                     WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s
-                    """, (new_desc, new_alarm_time, task_id, uid))
+                    """, (new_desc, new_alarm_time, task_id, task_uid))
 
             # Update alarm time and status
             elif new_alarm_time is not None and new_status is not None:
@@ -274,7 +263,7 @@ class TaskDatabase:
                     UPDATE tasks
                     SET {TASK_ALARM_TIME} = %s, {TASK_IS_COMPLETED} = %s
                     WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s
-                    """, (new_alarm_time, new_status, task_id, uid))
+                    """, (new_alarm_time, new_status, task_id, task_uid))
 
             # Update only the description if provided
             elif new_desc is not None:
@@ -282,7 +271,7 @@ class TaskDatabase:
                     UPDATE tasks
                     SET {TASK_DESCRIPTION} = %s
                     WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s
-                    """, (new_desc, task_id, uid))
+                    """, (new_desc, task_id, task_uid))
 
             # Update only the status if provided
             elif new_status is not None:
@@ -290,7 +279,7 @@ class TaskDatabase:
                     UPDATE tasks
                     SET {TASK_IS_COMPLETED} = %s
                     WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s
-                    """, (new_status, task_id, uid))
+                    """, (new_status, task_id, task_uid))
 
             # Update only the alarm time if provided
             elif new_alarm_time is not None:
@@ -298,7 +287,7 @@ class TaskDatabase:
                     UPDATE tasks
                     SET {TASK_ALARM_TIME} = %s
                     WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s
-                    """, (new_alarm_time, task_id, uid))
+                    """, (new_alarm_time, task_id, task_uid))
 
             else:
                 print("No changes specified for update.")
@@ -306,11 +295,11 @@ class TaskDatabase:
 
             # Commit the transaction and print success message
             self.connection.commit()
-            print(f"Task with ID {task_id} and {TASK_UID} {uid} updated successfully.")
+            print(f"Task with ID {task_id} and {TASK_UID} {task_uid} updated successfully.")
 
         except Exception as e:
             # Handle any errors and rollback changes if necessary
-            print(f"Error updating task with ID {task_id} and {TASK_UID} {uid}: {e}")
+            print(f"Error updating task with ID {task_id} and {TASK_UID} {task_uid}: {e}")
             self.connection.rollback()
 
 

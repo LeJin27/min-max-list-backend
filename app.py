@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import pytz
 
 USER_DATABASE_NAME = 'minmax'
-TASK_SCHEMA = ["task_id", "task_desc", "task_is_completed", "task_created_time_stamp","task_alarm_time", "uid"]
+TASK_SCHEMA = ["task_id", "task_uid", "task_desc", "task_is_completed", "task_created_time_stamp","task_alarm_time"]
 
 # convert a list of tuples to base model of task_schema
 def helper_tuple_to_task_base_model(list_of_tuples):
@@ -38,11 +38,11 @@ app.add_middleware(
 # frontend SHOULD not modify task_id and created_time
 class Task(BaseModel):
     task_id: int = None  
+    task_uid: str
     task_desc: str
     task_is_completed: bool
     task_created_time_stamp: datetime = None
     task_alarm_time: Optional[datetime] = None
-    uid: str
 
 @app.post("/tasks/")
 async def create_task(task: Task):
@@ -51,9 +51,9 @@ async def create_task(task: Task):
         # Ensure that task_alarm_time is parsed correctly
         task.task_alarm_time = datetime.fromisoformat(task.task_alarm_time.isoformat())
     print(task.task_alarm_time)
-    user_db.create_task(task.task_desc,task.task_alarm_time, task.uid)
+    user_db.create_task(task.task_uid, task.task_desc,task.task_alarm_time)
 
-    all_tasks = user_db.read_all_tasks(task.uid)
+    all_tasks = user_db.read_all_tasks(task.task_uid)
     most_recent_task = helper_tuple_to_task_base_model(all_tasks)[-1]
 
     # return most recent id of task to keep track of id in front end
@@ -62,15 +62,15 @@ async def create_task(task: Task):
 # tasks/?is_completed=True
 # tasks/?is_completed=false
 @app.get("/tasks/", response_model=List[Task])
-async def read_tasks(uid: str, task_is_completed: Optional[bool] = None):
+async def read_tasks(task_uid: str, task_is_completed: Optional[bool] = None):
 
     if task_is_completed is not None:
         if (task_is_completed):
-            returned_tasks = user_db.read_tasks_with_status(True, uid)
+            returned_tasks = user_db.read_tasks_with_status(task_uid, True)
         else: 
-            returned_tasks = user_db.read_tasks_with_status(False, uid)
+            returned_tasks = user_db.read_tasks_with_status(task_uid, False)
     else:
-        returned_tasks = user_db.read_all_tasks(uid)
+        returned_tasks = user_db.read_all_tasks(task_uid)
 
     # convert list of tuples to json
     returned_json = helper_tuple_to_task_base_model(returned_tasks)
@@ -86,7 +86,7 @@ async def read_task_id(task_id:int):
 async def update_task(task_id: int, task: Task):
     if task.task_alarm_time:
         task.task_alarm_time = task.task_alarm_time.astimezone(pytz.UTC)
-    user_db.update_task(task_id, uid = task.uid,new_desc=task.task_desc, new_status=task.task_is_completed,new_alarm_time=task.task_alarm_time)
+    user_db.update_task(task_id, task_uid = task.task_uid,new_desc=task.task_desc, new_status=task.task_is_completed,new_alarm_time=task.task_alarm_time)
     return JSONResponse(content={"message": "Task updated successfully"}, status_code=201)
 
 @app.delete("/tasks/{task_id}")
