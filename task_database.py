@@ -22,7 +22,7 @@ TASK_DESCRIPTION = "task_desc"
 TASK_IS_COMPLETED = "task_is_completed"
 TASK_CREATED_TIME_STAMP = "task_created_time_stamp"
 TASK_ALARM_TIME = "task_alarm_time"
-UID = "uid"
+TASK_UID = "task_uid"
 
 
 
@@ -72,7 +72,7 @@ class TaskDatabase:
                     {TASK_IS_COMPLETED} BOOLEAN,
                     {TASK_CREATED_TIME_STAMP} TIMESTAMPTZ,
                     {TASK_ALARM_TIME} TIMESTAMPTZ,
-                    {UID} VARCHAR(255)
+                    {TASK_UID} VARCHAR(255)
 
                     );
                     """)
@@ -116,7 +116,7 @@ class TaskDatabase:
 
 
             self.cursor.execute(f"""
-                INSERT INTO tasks({TASK_DESCRIPTION}, {TASK_IS_COMPLETED}, {TASK_CREATED_TIME_STAMP},{TASK_ALARM_TIME}, {UID})
+                INSERT INTO tasks({TASK_DESCRIPTION}, {TASK_IS_COMPLETED}, {TASK_CREATED_TIME_STAMP},{TASK_ALARM_TIME}, {TASK_UID})
                 VALUES(%s, %s, CURRENT_TIMESTAMP,%s, %s);
             """, (task_desc, False, task_alarm_time, uid))
         except Exception as e:
@@ -131,7 +131,7 @@ class TaskDatabase:
         try:
             if uid:
                 self.cursor.execute(f"""
-                        SELECT * FROM tasks WHERE {UID} = %s
+                        SELECT * FROM tasks WHERE {TASK_UID} = %s
                         """, (uid,))
             else:
                 self.cursor.execute(f"""
@@ -169,7 +169,7 @@ class TaskDatabase:
         try:
             if uid:
                 self.cursor.execute(f"""
-                        SELECT * FROM tasks WHERE {TASK_IS_COMPLETED} = %s AND {UID} = %s
+                        SELECT * FROM tasks WHERE {TASK_IS_COMPLETED} = %s AND {TASK_UID} = %s
                         """, (status, uid))
             else:
                 self.cursor.execute(f"""
@@ -249,7 +249,7 @@ class TaskDatabase:
                 self.cursor.execute(f"""
                     UPDATE tasks
                     SET {TASK_DESCRIPTION} = %s, {TASK_IS_COMPLETED} = %s, {TASK_ALARM_TIME} = %s
-                    WHERE {TASK_PRIMARY_KEY} = %s AND {UID} = %s
+                    WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s
                     """, (new_desc, new_status, new_alarm_time, task_id, uid))
 
             # Update description and status
@@ -257,7 +257,7 @@ class TaskDatabase:
                 self.cursor.execute(f"""
                     UPDATE tasks
                     SET {TASK_DESCRIPTION} = %s, {TASK_IS_COMPLETED} = %s
-                    WHERE {TASK_PRIMARY_KEY} = %s AND {UID} = %s
+                    WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s
                     """, (new_desc, new_status, task_id, uid))
 
             # Update description and alarm time
@@ -265,7 +265,7 @@ class TaskDatabase:
                 self.cursor.execute(f"""
                     UPDATE tasks
                     SET {TASK_DESCRIPTION} = %s, {TASK_ALARM_TIME} = %s
-                    WHERE {TASK_PRIMARY_KEY} = %s AND {UID} = %s
+                    WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s
                     """, (new_desc, new_alarm_time, task_id, uid))
 
             # Update alarm time and status
@@ -273,7 +273,7 @@ class TaskDatabase:
                 self.cursor.execute(f"""
                     UPDATE tasks
                     SET {TASK_ALARM_TIME} = %s, {TASK_IS_COMPLETED} = %s
-                    WHERE {TASK_PRIMARY_KEY} = %s AND {UID} = %s
+                    WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s
                     """, (new_alarm_time, new_status, task_id, uid))
 
             # Update only the description if provided
@@ -281,7 +281,7 @@ class TaskDatabase:
                 self.cursor.execute(f"""
                     UPDATE tasks
                     SET {TASK_DESCRIPTION} = %s
-                    WHERE {TASK_PRIMARY_KEY} = %s AND {UID} = %s
+                    WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s
                     """, (new_desc, task_id, uid))
 
             # Update only the status if provided
@@ -289,7 +289,7 @@ class TaskDatabase:
                 self.cursor.execute(f"""
                     UPDATE tasks
                     SET {TASK_IS_COMPLETED} = %s
-                    WHERE {TASK_PRIMARY_KEY} = %s AND {UID} = %s
+                    WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s
                     """, (new_status, task_id, uid))
 
             # Update only the alarm time if provided
@@ -297,7 +297,7 @@ class TaskDatabase:
                 self.cursor.execute(f"""
                     UPDATE tasks
                     SET {TASK_ALARM_TIME} = %s
-                    WHERE {TASK_PRIMARY_KEY} = %s AND {UID} = %s
+                    WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s
                     """, (new_alarm_time, task_id, uid))
 
             else:
@@ -306,11 +306,11 @@ class TaskDatabase:
 
             # Commit the transaction and print success message
             self.connection.commit()
-            print(f"Task with ID {task_id} and {UID} {uid} updated successfully.")
+            print(f"Task with ID {task_id} and {TASK_UID} {uid} updated successfully.")
 
         except Exception as e:
             # Handle any errors and rollback changes if necessary
-            print(f"Error updating task with ID {task_id} and {UID} {uid}: {e}")
+            print(f"Error updating task with ID {task_id} and {TASK_UID} {uid}: {e}")
             self.connection.rollback()
 
 
