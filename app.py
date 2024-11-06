@@ -76,10 +76,11 @@ async def read_tasks(task_uid: str, task_is_completed: Optional[bool] = None):
     returned_json = helper_tuple_to_task_base_model(returned_tasks)
     return returned_json
 
-@app.get("/tasks/{task_id}", response_model=List[Task])
+@app.get("/tasks/{task_id}", response_model=Task)
 async def read_task_id(task_id:int):
     returned_json = user_db.read_at_task_id(task_id)
-    return helper_tuple_to_task_base_model(returned_json)
+    print(returned_json)
+    return helper_tuple_to_task_base_model(returned_json)[0]
 
 
 @app.put("/tasks/{task_id}")
