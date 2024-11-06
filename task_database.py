@@ -1,12 +1,6 @@
-import firebase_admin
-from firebase_admin import credentials, auth, firestore
-
-# Path to your Firebase private key file
-cred = credentials.Certificate("/Users/pujitha/Downloads/to-do-list.json")
-firebase_admin.initialize_app(cred)
-
 import psycopg2
-from datetime import datetime, timedelta
+from datetime import datetime
+import pytz
 
 """
 Used to create a data for all todo related functions 
@@ -27,23 +21,13 @@ TASK_PRIMARY_KEY = "task_id"
 TASK_DESCRIPTION = "task_desc"
 TASK_IS_COMPLETED = "task_is_completed"
 TASK_CREATED_TIME_STAMP = "task_created_time_stamp"
-USER_ID = "user_id"
+TASK_ALARM_TIME = "task_alarm_time"
+UID = "uid"
 
 
 
 
 class TaskDatabase:
-
-    @staticmethod
-    def verify_user_token(id_token):
-        try:
-            decoded_token = auth.verify_id_token(id_token)
-            user_id = decoded_token['uid']  # This user ID can be stored in your PostgreSQL tasks table
-            return user_id
-        except Exception as e:
-            print(f"Error verifying user token: {e}")
-            return None
-
     # Use localhost, minmax, postgres, your password, 5432 
     def __init__(self, host, dbname, user, password, port):
         """
@@ -74,6 +58,7 @@ class TaskDatabase:
 
         self.create_table()
         
+
     
     def create_table(self):
         # Creating Table of Tasks
@@ -86,10 +71,11 @@ class TaskDatabase:
                     {TASK_DESCRIPTION} VARCHAR(255), 
                     {TASK_IS_COMPLETED} BOOLEAN,
                     {TASK_CREATED_TIME_STAMP} TIMESTAMPTZ,
-                    {USER_ID} VARCHAR(255)
+                    {TASK_ALARM_TIME} TIMESTAMPTZ,
+                    {UID} VARCHAR(255)
+
                     );
                     """)
-            
         except Exception as e:
             print("Something when wrong")
     
@@ -112,131 +98,86 @@ class TaskDatabase:
             print(f"Error creating database: {e}")
     
 
-    def create_task(self, task_desc):
+    
+    def create_task(self, task_desc, task_alarm_time=None, uid=None):
         """
         Creates basic task which is automatically set to false completed. Needs time implementation.
         """
+        print(f"Task Alarm Time: {task_alarm_time}, Type: {type(task_alarm_time)}")
 
         try:
-            self.cursor.execute(f"""
-                INSERT INTO tasks({TASK_DESCRIPTION}, {TASK_IS_COMPLETED}, {TASK_CREATED_TIME_STAMP})
-                VALUES(%s, %s, CURRENT_TIMESTAMP);
-            """, (task_desc, False))
-            print("Task created.")
+            # check if alarm is string or datetime and handle appropiately
+            if task_alarm_time:
+                if isinstance(task_alarm_time, str):
+                    task_alarm_time = datetime.fromisoformat(task_alarm_time)
 
+                if isinstance(task_alarm_time,datetime):
+                    task_alarm_time = task_alarm_time.astimezone(pytz.UTC)
+
+
+            self.cursor.execute(f"""
+                INSERT INTO tasks({TASK_DESCRIPTION}, {TASK_IS_COMPLETED}, {TASK_CREATED_TIME_STAMP},{TASK_ALARM_TIME}, {UID})
+                VALUES(%s, %s, CURRENT_TIMESTAMP,%s, %s);
+            """, (task_desc, False, task_alarm_time, uid))
         except Exception as e:
             print(f"Error creating task: {e}")
-            self.connection.rollback()
         
         self.connection.commit()
 
-    
-    def create_user_task(self, task_desc, user_id=None):
+    def read_all_tasks(self, uid=None):
         """
-        Creates task for a specific user.
+        Reads all tasks in list, optionally filtered by uid.
         """
-
         try:
-            self.cursor.execute(f"""
-                INSERT INTO tasks({TASK_DESCRIPTION}, {TASK_IS_COMPLETED}, {TASK_CREATED_TIME_STAMP}, {USER_ID})
-                VALUES(%s, %s, CURRENT_TIMESTAMP, %s);
-            """, (task_desc, False, user_id))
-            print("Task created.")
-
-        except Exception as e:
-            print(f"Error creating task: {e}")
-            self.connection.rollback()
-        
-        self.connection.commit()
-
-
-    def read_all_tasks(self):
-        """Reads all tasks in list for a specific user."""
-
-        try:
-            self.cursor.execute(f"""
-                SELECT * FROM tasks;
-            """)
-            all_tasks = self.cursor.fetchall()
-            return all_tasks
-        
+            if uid:
+                self.cursor.execute(f"""
+                        SELECT * FROM tasks WHERE {UID} = %s
+                        """, (uid,))
+            else:
+                self.cursor.execute(f"""
+                        SELECT * FROM tasks
+                        """)
         except Exception as e:
             print(f"Error reading tasks: {e}")
     
-
-    def read_user_tasks(self, user_id=None):
-        """Reads all tasks in list for a specific user."""
-
-        try:
-            self.cursor.execute(f"""
-                SELECT * FROM tasks WHERE {USER_ID} = %s;
-            """, (user_id))
-            all_tasks = self.cursor.fetchall()
-            return all_tasks
-        
-        except Exception as e:
-            print(f"Error reading tasks: {e}")
-
-
-    def read_at_task_id(self, index):
-        """Reads task at index"""
-
-        try:
-            self.cursor.execute(f"""
-                SELECT * FROM tasks WHERE {TASK_PRIMARY_KEY} = %s;
-            """, (index))
-            task = self.cursor.fetchone()
-            return task
-        
-        except Exception as e:
-            print(f"Error reading task: {e}")
-
-
-    def read_user_task_id(self, index, user_id=None):
-        """Reads task at index for a specific user."""
-
-        try:
-            self.cursor.execute(f"""
-                SELECT * FROM tasks WHERE {TASK_PRIMARY_KEY} = %s AND {USER_ID} = %s;
-            """, (index, user_id))
-            task = self.cursor.fetchone()
-            return task
-        
-        except Exception as e:
-            print(f"Error reading task: {e}")
-
-
-    def read_tasks_with_status(self, status):
-        """
-        Reads all tasks with an is completed status set to either (True or False)
-
-        """
-        try:
-            self.cursor.execute(f"""
-                    SELECT * FROM tasks WHERE {TASK_IS_COMPLETED} = {status}
-                    """);
-
-        except Exception as e:
-            print(f"Error reading task: {e}")
-        
         self.connection.commit()
+
         all_tasks = self.cursor.fetchall()
         return all_tasks
     
-
-    def read_user_tasks_with_status(self, status, user_id):
+    def read_at_task_id(self, index):
         """
-        Reads all tasks with an is completed status set to either (True or False) for a specific user
-
+        Reads task at index i
         """
         try:
             self.cursor.execute(f"""
-                    SELECT * FROM tasks WHERE {TASK_IS_COMPLETED} = {status} AND {USER_ID} = %s;
+                    SELECT * FROM tasks WHERE {TASK_PRIMARY_KEY} = {index}
                     """);
-
         except Exception as e:
             print(f"Error reading task: {e}")
         
+        self.connection.commit()
+
+        all_tasks = self.cursor.fetchall()
+        return all_tasks
+
+
+    def read_tasks_with_status(self, status, uid=None):
+        """
+        Reads all tasks with an is open status set to either (True or False), optionally filtered by uid.
+        """
+        try:
+            if uid:
+                self.cursor.execute(f"""
+                        SELECT * FROM tasks WHERE {TASK_IS_COMPLETED} = %s AND {UID} = %s
+                        """, (status, uid))
+            else:
+                self.cursor.execute(f"""
+                        SELECT * FROM tasks WHERE {TASK_IS_COMPLETED} = %s
+                        """, (status,))
+        except Exception as e:
+            print(f"Error reading task: {e}")
+
         self.connection.commit()
         all_tasks = self.cursor.fetchall()
         return all_tasks
@@ -253,8 +194,6 @@ class TaskDatabase:
             print("Deleted all tasks")
         except Exception as e:
             print(f"Error deleting all tasks: {e}")
-            self.connection.rollback()
-
 
     def delete_task_by_index(self,index):
         """
@@ -264,7 +203,7 @@ class TaskDatabase:
             # fetches task  useing %s to only catch string type arguments 
             self.cursor.execute(f"""
                 SELECT * FROM tasks WHERE {TASK_PRIMARY_KEY} = %s
-                """, (index))
+                """, (index,))
             task = self.cursor.fetchone()
 
             #if task found delete otherwise print not found
@@ -273,41 +212,11 @@ class TaskDatabase:
 
                 self.cursor.execute(f"""
                     DELETE FROM tasks WHERE {TASK_PRIMARY_KEY} = %s 
-                    """,(index))
+                    """,(index,))
             else:
                 print(f"No task found with index: {index}")
         except Exception as e:
             print(f"Error deleting task by index: {e}")
-            self.connection.rollback()
-
-        self.connection.commit()
-
-
-    def delete_user_task_by_index(self,index, user_id=None):
-        """
-        Deletes a task from a specific user using the index
-        """
-        try:
-            # fetches task  useing %s to only catch string type arguments 
-            self.cursor.execute(f"""
-                SELECT * FROM tasks WHERE {TASK_PRIMARY_KEY} = %s AND {USER_ID} = %s
-                """, (index, user_id))
-            task = self.cursor.fetchone()
-
-            #if task found delete otherwise print not found
-            if task:
-                print(f"Deleting task: {task}")
-
-                self.cursor.execute(f"""
-                    DELETE FROM tasks WHERE {TASK_PRIMARY_KEY} = %s AND {USER_ID} = %s
-                    """,(index, user_id))
-            else:
-                print(f"No task found with index: {index}")
-
-        except Exception as e:
-            print(f"Error deleting task by index: {e}")
-            self.connection.rollback()
-
         self.connection.commit()
 
     def delete_task_by_desc(self,desc):
@@ -329,220 +238,106 @@ class TaskDatabase:
             self.connection.rollback()
 
         self.connection.commit()
+
+    def update_task(self, task_id, uid, new_desc=None, new_status=None, new_alarm_time=None):
+        """
+        Updates a task's description, status, or both based on the task_id and uid.
+        """
+        try:
+            # Update both description, status, and alarm time if all are provided
+            if new_desc is not None and new_status is not None and new_alarm_time is not None:
+                self.cursor.execute(f"""
+                    UPDATE tasks
+                    SET {TASK_DESCRIPTION} = %s, {TASK_IS_COMPLETED} = %s, {TASK_ALARM_TIME} = %s
+                    WHERE {TASK_PRIMARY_KEY} = %s AND {UID} = %s
+                    """, (new_desc, new_status, new_alarm_time, task_id, uid))
+
+            # Update description and status
+            elif new_desc is not None and new_status is not None:
+                self.cursor.execute(f"""
+                    UPDATE tasks
+                    SET {TASK_DESCRIPTION} = %s, {TASK_IS_COMPLETED} = %s
+                    WHERE {TASK_PRIMARY_KEY} = %s AND {UID} = %s
+                    """, (new_desc, new_status, task_id, uid))
+
+            # Update description and alarm time
+            elif new_desc is not None and new_alarm_time is not None:
+                self.cursor.execute(f"""
+                    UPDATE tasks
+                    SET {TASK_DESCRIPTION} = %s, {TASK_ALARM_TIME} = %s
+                    WHERE {TASK_PRIMARY_KEY} = %s AND {UID} = %s
+                    """, (new_desc, new_alarm_time, task_id, uid))
+
+            # Update alarm time and status
+            elif new_alarm_time is not None and new_status is not None:
+                self.cursor.execute(f"""
+                    UPDATE tasks
+                    SET {TASK_ALARM_TIME} = %s, {TASK_IS_COMPLETED} = %s
+                    WHERE {TASK_PRIMARY_KEY} = %s AND {UID} = %s
+                    """, (new_alarm_time, new_status, task_id, uid))
+
+            # Update only the description if provided
+            elif new_desc is not None:
+                self.cursor.execute(f"""
+                    UPDATE tasks
+                    SET {TASK_DESCRIPTION} = %s
+                    WHERE {TASK_PRIMARY_KEY} = %s AND {UID} = %s
+                    """, (new_desc, task_id, uid))
+
+            # Update only the status if provided
+            elif new_status is not None:
+                self.cursor.execute(f"""
+                    UPDATE tasks
+                    SET {TASK_IS_COMPLETED} = %s
+                    WHERE {TASK_PRIMARY_KEY} = %s AND {UID} = %s
+                    """, (new_status, task_id, uid))
+
+            # Update only the alarm time if provided
+            elif new_alarm_time is not None:
+                self.cursor.execute(f"""
+                    UPDATE tasks
+                    SET {TASK_ALARM_TIME} = %s
+                    WHERE {TASK_PRIMARY_KEY} = %s AND {UID} = %s
+                    """, (new_alarm_time, task_id, uid))
+
+            else:
+                print("No changes specified for update.")
+                return
+
+            # Commit the transaction and print success message
+            self.connection.commit()
+            print(f"Task with ID {task_id} and {UID} {uid} updated successfully.")
+
+        except Exception as e:
+            # Handle any errors and rollback changes if necessary
+            print(f"Error updating task with ID {task_id} and {UID} {uid}: {e}")
+            self.connection.rollback()
+
+
     
     def __del__(self):
         print("Closing connection")
         self.connection.close()
 
-    def update_task(self, task_id, new_desc=None, new_status=None):
-        """Updates a task's description, status, or both based on the task_id"""
-        try:
-            if new_desc is not None and new_status is not None:
-                self.cursor.execute(f"""
-                    UPDATE tasks
-                    SET {TASK_DESCRIPTION} = %s, {TASK_IS_COMPLETED} = %s
-                    WHERE {TASK_PRIMARY_KEY} = %s;
-                """, (new_desc, new_status, task_id))
-            elif new_desc is not None:
-                self.cursor.execute(f"""
-                    UPDATE tasks
-                    SET {TASK_DESCRIPTION} = %s
-                    WHERE {TASK_PRIMARY_KEY} = %s;
-                """, (new_desc, task_id))
-            elif new_status is not None:
-                self.cursor.execute(f"""
-                    UPDATE tasks
-                    SET {TASK_IS_COMPLETED} = %s
-                    WHERE {TASK_PRIMARY_KEY} = %s;
-                """, (new_status, task_id))
-            else:
-                print("No changes specified for update.")
-                return
-            
-            self.connection.commit()
-            print(f"Task with ID {task_id} updated successfully.")
-
-        except Exception as e:
-            print(f"Error updating task with ID {task_id}: {e}")
-            self.connection.rollback()
 
 
-    def update_user_task(self, task_id, new_desc=None, new_status=None, user_id=None):
-        """Updates a task's description, status, or both based on the task_id for a specific user."""
-        try:
-            if new_desc is not None and new_status is not None:
-                self.cursor.execute(f"""
-                    UPDATE tasks
-                    SET {TASK_DESCRIPTION} = %s, {TASK_IS_COMPLETED} = %s
-                    WHERE {TASK_PRIMARY_KEY} = %s AND {USER_ID} = %s;
-                """, (new_desc, new_status, task_id, user_id))
-            elif new_desc is not None:
-                self.cursor.execute(f"""
-                    UPDATE tasks
-                    SET {TASK_DESCRIPTION} = %s
-                    WHERE {TASK_PRIMARY_KEY} = %s AND {USER_ID} = %s;
-                """, (new_desc, task_id, user_id))
-            elif new_status is not None:
-                self.cursor.execute(f"""
-                    UPDATE tasks
-                    SET {TASK_IS_COMPLETED} = %s
-                    WHERE {TASK_PRIMARY_KEY} = %s AND {USER_ID} = %s;
-                """, (new_status, task_id, user_id))
-            else:
-                print("No changes specified for update.")
-                return
-            
-            self.connection.commit()
-            print(f"Task with ID {task_id} updated successfully.")
-
-        except Exception as e:
-            print(f"Error updating task with ID {task_id}: {e}")
-            self.connection.rollback()
-
-    def get_tasks_created_last_week(self, user_id):
-        """Gets the count of tasks created in the last week for a specific user."""
-
-        try:
-            last_week = datetime.now() - timedelta(days=7)
-            self.cursor.execute(f"""
-                SELECT COUNT(*) FROM tasks 
-                WHERE {USER_ID} = %s AND {TASK_CREATED_TIME_STAMP} >= %s;
-            """, (user_id, last_week))
-            created_count = self.cursor.fetchone()[0]
-            return created_count
-        
-        except Exception as e:
-            print(f"Error fetching tasks created in last week: {e}")
-            return None
-
-    def get_tasks_completed_last_week(self, user_id):
-        """Gets the count of tasks completed in the last week for a specific user."""
-
-        try:
-            last_week = datetime.now() - timedelta(days=7)
-            self.cursor.execute(f"""
-                SELECT COUNT(*) FROM tasks 
-                WHERE {USER_ID} = %s AND {TASK_IS_COMPLETED} = TRUE 
-                AND {TASK_CREATED_TIME_STAMP} >= %s;
-            """, (user_id, last_week))
-            completed_count = self.cursor.fetchone()[0]
-            return completed_count
-        
-        except Exception as e:
-            print(f"Error fetching tasks completed in last week: {e}")
-            return None
-        
-    def get_tasks_created_and_completed_week(self, user_id, start_date):
-        """Gets counts of tasks created and completed in a given week for a specific user."""
-
-        try:
-            end_date = start_date + timedelta(days=7)
-
-            # Tasks created in the specified week
-            self.cursor.execute(f"""
-                SELECT COUNT(*) FROM tasks 
-                WHERE {USER_ID} = %s AND {TASK_CREATED_TIME_STAMP} >= %s 
-                AND {TASK_CREATED_TIME_STAMP} < %s;
-            """, (user_id, start_date, end_date))
-            created_count = self.cursor.fetchone()[0]
-
-            # Tasks completed in the specified week
-            self.cursor.execute(f"""
-                SELECT COUNT(*) FROM tasks 
-                WHERE {USER_ID} = %s AND {TASK_IS_COMPLETED} = TRUE 
-                AND {TASK_CREATED_TIME_STAMP} >= %s AND {TASK_CREATED_TIME_STAMP} < %s;
-            """, (user_id, start_date, end_date))
-            completed_count = self.cursor.fetchone()[0]
-
-            return {"tasks_created": created_count, "tasks_completed": completed_count}
-        
-        except Exception as e:
-            print(f"Error fetching tasks for week starting on {start_date}: {e}")
-            return None
-
-
-    def get_tasks_created_last_month(self, user_id):
-        """Gets the count of tasks created in the last month for a specific user."""
-
-        try:
-            last_month = datetime.now() - timedelta(days=30)
-            self.cursor.execute(f"""
-                SELECT COUNT(*) FROM tasks 
-                WHERE {USER_ID} = %s AND {TASK_CREATED_TIME_STAMP} >= %s;
-            """, (user_id, last_month))
-            task_count = self.cursor.fetchone()[0]
-            return task_count
-        
-        except Exception as e:
-            print(f"Error fetching tasks created in last month: {e}")
-            return None
-        
-    def get_tasks_completed_last_month(self, user_id):
-        """Gets the count of tasks completed in the last month for a specific user."""
-
-        try:
-            last_month = datetime.now() - timedelta(days=30)
-            self.cursor.execute(f"""
-                SELECT COUNT(*) FROM tasks 
-                WHERE {USER_ID} = %s AND {TASK_IS_COMPLETED} = TRUE 
-                AND {TASK_CREATED_TIME_STAMP} >= %s;
-            """, (user_id, last_month))
-            completed_count = self.cursor.fetchone()[0]
-            return completed_count
-        
-        except Exception as e:
-            print(f"Error fetching tasks completed in last month: {e}")
-            return None
-        
-    def get_tasks_created_and_completed_month(self, user_id, month, year):
-        """Gets counts of tasks created and completed in a given month for a specific user."""
-
-        try:
-            start_date = datetime(year, month, 1)
-            end_date = (start_date + timedelta(days=31)).replace(day=1)  # First day of the next month
-            
-            # Tasks created in the specified month
-            self.cursor.execute(f"""
-                SELECT COUNT(*) FROM tasks 
-                WHERE {USER_ID} = %s AND {TASK_CREATED_TIME_STAMP} >= %s 
-                AND {TASK_CREATED_TIME_STAMP} < %s;
-            """, (user_id, start_date, end_date))
-            created_count = self.cursor.fetchone()[0]
-
-            # Tasks completed in the specified month
-            self.cursor.execute(f"""
-                SELECT COUNT(*) FROM tasks 
-                WHERE {USER_ID} = %s AND {TASK_IS_COMPLETED} = TRUE 
-                AND {TASK_CREATED_TIME_STAMP} >= %s AND {TASK_CREATED_TIME_STAMP} < %s;
-            """, (user_id, start_date, end_date))
-            completed_count = self.cursor.fetchone()[0]
-
-            return {"tasks_created": created_count, "tasks_completed": completed_count}
-        except Exception as e:
-            print(f"Error fetching tasks for month {month}/{year}: {e}")
-            return None
 
 
     
+        
 
 
 
 
 
 
-#minmax_database = TaskDatabase("localhost", "to_do_list", "postgres", "dog", 5433)
-#minmax_database.create_task("Test")
-#minmax_database.create_task("Dog")
-#minmax_database.update_task(11, "Cat", True)
-#print(minmax_database.read_all_tasks())
-#minmax_database.delete_all_tasks()
 
-#minmax_database = TaskDatabase("localhost", "minmax", "postgres", "dog", 5432)
-#minmax_database.create_task("Test")
-#minmax_database.create_task("Dog")
-#listTest = minmax_database.read_tasks_with_status(False)
-#
-#
-#
-#for x in listTest:
-#    print(x)
+
+
+
+
+
+
+
+
+
