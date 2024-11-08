@@ -39,6 +39,7 @@ app.add_middleware(
 class Task(BaseModel):
     task_id: int = None  
     task_uid: str
+    task_list: str
     task_desc: str
     task_is_completed: bool
     task_created_time_stamp: datetime = None
