@@ -126,21 +126,32 @@ class TaskDatabase:
         
         self.connection.commit()
 
-    def read_all_tasks(self, task_uid):
+
+    def read_all_tasks(self, task_uid, task_list=None):
         """
-        Reads all tasks in list, optionally filtered by uid.
+        Reads all tasks, filtered by uid and optionally by task_list.
         """
         try:
-            self.cursor.execute(f"""
-                    SELECT * FROM tasks WHERE {TASK_UID} = %s
+            if task_list is not None:
+                # Filter by both task_uid and task_list
+                self.cursor.execute(f"""
+                    SELECT * FROM tasks 
+                    WHERE {TASK_UID} = %s AND {TASK_LIST} = %s
+                    """, (task_uid, task_list))
+            else:
+                # Filter only by task_uid
+                self.cursor.execute(f"""
+                    SELECT * FROM tasks 
+                    WHERE {TASK_UID} = %s
                     """, (task_uid,))
+
+            # Fetch all matching tasks
+            all_tasks = self.cursor.fetchall()
+            return all_tasks
+
         except Exception as e:
             print(f"Error reading tasks: {e}")
-    
-        self.connection.commit()
-
-        all_tasks = self.cursor.fetchall()
-        return all_tasks
+            return None
     
     def read_at_task_id(self, index):
         """
@@ -159,20 +170,32 @@ class TaskDatabase:
         return all_tasks
 
 
-    def read_tasks_with_status(self, task_uid, status):
+    def read_tasks_with_status(self, task_uid, status, task_list=None):
         """
-        Reads all tasks with an is open status set to either (True or False), optionally filtered by uid.
+        Reads all tasks with a specified completion status (True or False), optionally filtered by task_uid and task_list.
         """
         try:
-            self.cursor.execute(f"""
-                    SELECT * FROM tasks WHERE {TASK_IS_COMPLETED} = %s AND {TASK_UID} = %s
+            if task_list is not None:
+                # Filter by task_uid, status, and task_list
+                self.cursor.execute(f"""
+                    SELECT * FROM tasks 
+                    WHERE {TASK_IS_COMPLETED} = %s AND {TASK_UID} = %s AND {TASK_LIST} = %s
+                    """, (status, task_uid, task_list))
+            else:
+                # Filter only by task_uid and status
+                self.cursor.execute(f"""
+                    SELECT * FROM tasks 
+                    WHERE {TASK_IS_COMPLETED} = %s AND {TASK_UID} = %s
                     """, (status, task_uid))
-        except Exception as e:
-            print(f"Error reading task: {e}")
 
-        self.connection.commit()
-        all_tasks = self.cursor.fetchall()
-        return all_tasks
+            # Fetch all matching tasks
+            all_tasks = self.cursor.fetchall()
+            return all_tasks
+
+        except Exception as e:
+            print(f"Error reading tasks: {e}")
+            return None
+
 
 
     def delete_all_tasks(self):
@@ -243,7 +266,7 @@ class TaskDatabase:
                     SET {TASK_DESCRIPTION} = %s, {TASK_IS_COMPLETED} = %s, {TASK_ALARM_TIME} = %s, {TASK_LIST} = %s
                     WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s
                     """, (new_desc, new_status, new_alarm_time, task_list, task_id, task_uid))
-    
+
             # Update description, status, and task list
             elif new_desc is not None and new_status is not None and task_list is not None:
                 self.cursor.execute(f"""
@@ -251,7 +274,7 @@ class TaskDatabase:
                     SET {TASK_DESCRIPTION} = %s, {TASK_IS_COMPLETED} = %s, {TASK_LIST} = %s
                     WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s
                     """, (new_desc, new_status, task_list, task_id, task_uid))
-    
+
             # Update description, alarm time, and task list
             elif new_desc is not None and new_alarm_time is not None and task_list is not None:
                 self.cursor.execute(f"""
@@ -259,7 +282,7 @@ class TaskDatabase:
                     SET {TASK_DESCRIPTION} = %s, {TASK_ALARM_TIME} = %s, {TASK_LIST} = %s
                     WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s
                     """, (new_desc, new_alarm_time, task_list, task_id, task_uid))
-    
+
             # Update status, alarm time, and task list
             elif new_status is not None and new_alarm_time is not None and task_list is not None:
                 self.cursor.execute(f"""
@@ -267,7 +290,7 @@ class TaskDatabase:
                     SET {TASK_IS_COMPLETED} = %s, {TASK_ALARM_TIME} = %s, {TASK_LIST} = %s
                     WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s
                     """, (new_status, new_alarm_time, task_list, task_id, task_uid))
-    
+
             # Update description and task list
             elif new_desc is not None and task_list is not None:
                 self.cursor.execute(f"""
@@ -275,7 +298,7 @@ class TaskDatabase:
                     SET {TASK_DESCRIPTION} = %s, {TASK_LIST} = %s
                     WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s
                     """, (new_desc, task_list, task_id, task_uid))
-    
+
             # Update status and task list
             elif new_status is not None and task_list is not None:
                 self.cursor.execute(f"""
@@ -283,7 +306,7 @@ class TaskDatabase:
                     SET {TASK_IS_COMPLETED} = %s, {TASK_LIST} = %s
                     WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s
                     """, (new_status, task_list, task_id, task_uid))
-    
+
             # Update alarm time and task list
             elif new_alarm_time is not None and task_list is not None:
                 self.cursor.execute(f"""
@@ -291,7 +314,7 @@ class TaskDatabase:
                     SET {TASK_ALARM_TIME} = %s, {TASK_LIST} = %s
                     WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s
                     """, (new_alarm_time, task_list, task_id, task_uid))
-    
+
             # Update only the task list if provided
             elif task_list is not None:
                 self.cursor.execute(f"""
@@ -299,7 +322,7 @@ class TaskDatabase:
                     SET {TASK_LIST} = %s
                     WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s
                     """, (task_list, task_id, task_uid))
-    
+
             # Existing update cases for single fields
             elif new_desc is not None:
                 self.cursor.execute(f"""
@@ -307,29 +330,29 @@ class TaskDatabase:
                     SET {TASK_DESCRIPTION} = %s
                     WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s
                     """, (new_desc, task_id, task_uid))
-    
+
             elif new_status is not None:
                 self.cursor.execute(f"""
                     UPDATE tasks
                     SET {TASK_IS_COMPLETED} = %s
                     WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s
                     """, (new_status, task_id, task_uid))
-    
+
             elif new_alarm_time is not None:
                 self.cursor.execute(f"""
                     UPDATE tasks
                     SET {TASK_ALARM_TIME} = %s
                     WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s
                     """, (new_alarm_time, task_id, task_uid))
-    
+
             else:
                 print("No changes specified for update.")
                 return
-    
+
             # Commit the transaction and print success message
             self.connection.commit()
             print(f"Task with ID {task_id} and {TASK_UID} {task_uid} updated successfully.")
-    
+
         except Exception as e:
             # Handle any errors and rollback changes if necessary
             print(f"Error updating task with ID {task_id} and {TASK_UID} {task_uid}: {e}")

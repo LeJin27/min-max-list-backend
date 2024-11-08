@@ -62,20 +62,26 @@ async def create_task(task: Task):
 
 # tasks/?is_completed=True
 # tasks/?is_completed=false
+
 @app.get("/tasks/", response_model=List[Task])
-async def read_tasks(task_uid: str, task_is_completed: Optional[bool] = None):
-
+async def read_tasks(
+    task_uid: str, 
+    task_is_completed: Optional[bool] = None,
+    task_list: Optional[str] = None
+):
+    # Determine which tasks to return based on provided filters
     if task_is_completed is not None:
-        if (task_is_completed):
-            returned_tasks = user_db.read_tasks_with_status(task_uid, True)
-        else: 
-            returned_tasks = user_db.read_tasks_with_status(task_uid, False)
+        if task_is_completed:
+            returned_tasks = user_db.read_tasks_with_status(task_uid, True, task_list)
+        else:
+            returned_tasks = user_db.read_tasks_with_status(task_uid, False, task_list)
     else:
-        returned_tasks = user_db.read_all_tasks(task_uid)
+        returned_tasks = user_db.read_all_tasks(task_uid, task_list)
 
-    # convert list of tuples to json
+    # Convert list of tuples to JSON
     returned_json = helper_tuple_to_task_base_model(returned_tasks)
     return returned_json
+
 
 @app.get("/tasks/{task_id}", response_model=Task)
 async def read_task_id(task_id:int):
