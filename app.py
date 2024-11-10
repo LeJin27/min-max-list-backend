@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import pytz
 
 USER_DATABASE_NAME = 'minmax'
-TASK_SCHEMA = ["task_id", "task_uid", "task_list", "task_desc", "task_is_completed", "task_created_time_stamp","task_alarm_time"]
+TASK_SCHEMA = ["task_id", "task_uid", "task_list", "task_desc", "task_is_completed", "task_created_time_stamp","task_alarm_time","task_due_date"]
 
 # convert a list of tuples to base model of task_schema
 def helper_tuple_to_task_base_model(list_of_tuples):
@@ -44,15 +44,20 @@ class Task(BaseModel):
     task_is_completed: bool
     task_created_time_stamp: datetime = None
     task_alarm_time: Optional[datetime] = None
+    task_due_date: Optional[datetime] = None
 
 @app.post("/tasks/")
 async def create_task(task: Task):
-    print(task.task_alarm_time)
+    # print(task.task_alarm_time)
     if task.task_alarm_time:
         # Ensure that task_alarm_time is parsed correctly
         task.task_alarm_time = datetime.fromisoformat(task.task_alarm_time.isoformat())
-    print(task.task_alarm_time)
-    user_db.create_task(task.task_uid,task.task_list, task.task_desc,task.task_alarm_time)
+    # print(task.task_alarm_time)
+
+    if task.task_due_date:
+        # Ensure that task_alarm_time is parsed correctly
+        task.task_due_date = datetime.fromisoformat(task.task_due_date.isoformat())
+    user_db.create_task(task.task_uid,task.task_list, task.task_desc, task.task_alarm_time, task.task_due_date)
 
     all_tasks = user_db.read_all_tasks(task.task_uid)
     most_recent_task = helper_tuple_to_task_base_model(all_tasks)[-1]
@@ -94,7 +99,9 @@ async def read_task_id(task_id:int):
 async def update_task(task_id: int, task: Task):
     if task.task_alarm_time:
         task.task_alarm_time = task.task_alarm_time.astimezone(pytz.UTC)
-    user_db.update_task(task_id, task_uid = task.task_uid, task_list = task.task_list, new_desc=task.task_desc, new_status=task.task_is_completed,new_alarm_time=task.task_alarm_time)
+    if task.task_due_date:
+        task.task_due_date = task.task_due_date.astimezone(pytz.UTC)
+    user_db.update_task(task_id, task_uid = task.task_uid, task_list = task.task_list, new_desc=task.task_desc, new_status=task.task_is_completed,new_alarm_time=task.task_alarm_time, new_due_date=task.task_due_date)
     return JSONResponse(content={"message": "Task updated successfully"}, status_code=201)
 
 @app.delete("/tasks/{task_id}")
