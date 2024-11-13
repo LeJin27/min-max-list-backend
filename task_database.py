@@ -151,7 +151,7 @@ class TaskDatabase:
         self.connection.commit()
 
 
-    def read_all_tasks(self, task_uid, task_list=None,  task_created_time_stamp=None):
+    def read_all_tasks(self, task_uid, task_list=None, task_is_completed = None,task_created_time_stamp=None):
         """
         Reads all tasks, filtered by uid and optionally by task_list.
         """
@@ -164,6 +164,10 @@ class TaskDatabase:
             if task_list is not None:
                 query += f" AND {TASK_LIST} = %s"
                 params.append(task_list)
+
+            if task_is_completed is not None:
+                query += f" AND {TASK_IS_COMPLETED} = %s"
+                params.append(task_is_completed)
 
             # add optional timestamp filter using DATE() to ignore time
             if task_created_time_stamp is not None:
@@ -286,31 +290,31 @@ class TaskDatabase:
         self.connection.commit()
     
     def update_task(self, task_id, task_uid, task_list=None, new_desc=None, new_status=None, new_alarm_time=None, new_due_date=None):
-        fields = []
-        values = []
+        query = []
+        params = []
     
         if new_desc is not None:
-            fields.append(f"{TASK_DESCRIPTION} = %s")
-            values.append(new_desc)
+            query.append(f"{TASK_DESCRIPTION} = %s")
+            params.append(new_desc)
         if new_status is not None:
-            fields.append(f"{TASK_IS_COMPLETED} = %s")
-            values.append(new_status)
+            query.append(f"{TASK_IS_COMPLETED} = %s")
+            params.append(new_status)
         if new_alarm_time is not None:
-            values.append(new_alarm_time.astimezone(pytz.UTC) if isinstance(new_alarm_time, datetime) else datetime.fromisoformat(new_alarm_time).astimezone(pytz.UTC))
-            fields.append(f"{TASK_ALARM_TIME} = %s")
+            params.append(new_alarm_time.astimezone(pytz.UTC) if isinstance(new_alarm_time, datetime) else datetime.fromisoformat(new_alarm_time).astimezone(pytz.UTC))
+            query.append(f"{TASK_ALARM_TIME} = %s")
         if new_due_date is not None:
-            values.append(new_due_date.astimezone(pytz.UTC) if isinstance(new_due_date, datetime) else datetime.fromisoformat(new_due_date).astimezone(pytz.UTC))
-            fields.append(f"{TASK_DUE_DATE} = %s")
+            params.append(new_due_date.astimezone(pytz.UTC) if isinstance(new_due_date, datetime) else datetime.fromisoformat(new_due_date).astimezone(pytz.UTC))
+            query.append(f"{TASK_DUE_DATE} = %s")
         if task_list is not None:
-            fields.append(f"{TASK_LIST} = %s")
-            values.append(task_list)
+            query.append(f"{TASK_LIST} = %s")
+            params.append(task_list)
     
-        if fields:
-            values.extend([task_id, task_uid])
-            query = f"UPDATE tasks SET {', '.join(fields)} WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s"
+        if query:
+            params.extend([task_id, task_uid])
+            query = f"UPDATE tasks SET {', '.join(query)} WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s"
 
             try:
-                self.cursor.execute(query, tuple(values))
+                self.cursor.execute(query, tuple(params))
                 self.connection.commit()
                 print("Task updated successfully.")
             except Exception as e:
