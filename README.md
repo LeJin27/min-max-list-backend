@@ -10,6 +10,7 @@
 ```
 pip install "fastapi[standard]"
 pip install psycopg2-binary
+pip install pytz 
 ```
 - Install postgresql on own system 
     - Ensure that it runs
