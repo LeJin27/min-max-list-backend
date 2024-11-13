@@ -151,31 +151,38 @@ class TaskDatabase:
         self.connection.commit()
 
 
-    def read_all_tasks(self, task_uid, task_list=None):
+    def read_all_tasks(self, task_uid, task_list=None,  task_created_time_stamp=None):
         """
         Reads all tasks, filtered by uid and optionally by task_list.
         """
         try:
-            if task_list is not None:
-                # Filter by both task_uid and task_list
-                self.cursor.execute(f"""
-                    SELECT * FROM tasks 
-                    WHERE {TASK_UID} = %s AND {TASK_LIST} = %s
-                    """, (task_uid, task_list))
-            else:
-                # Filter only by task_uid
-                self.cursor.execute(f"""
-                    SELECT * FROM tasks 
-                    WHERE {TASK_UID} = %s
-                    """, (task_uid,))
+            # Build the base query
+            query = f"SELECT * FROM tasks WHERE {TASK_UID} = %s"
+            params = [task_uid]
 
-            # Fetch all matching tasks
-            all_tasks = self.cursor.fetchall()
-            return all_tasks
+            # Add optional task_list filter
+            if task_list is not None:
+                query += f" AND {TASK_LIST} = %s"
+                params.append(task_list)
+
+            # add optional timestamp filter using DATE() to ignore time
+            if task_created_time_stamp is not None:
+                query += f" AND DATE({TASK_CREATED_TIME_STAMP}) = %s"
+                params.append(task_created_time_stamp)
+
+
+            # use custom built query and input user variables
+            self.cursor.execute(query, tuple(params))
+
+            tasks = self.cursor.fetchall()
+            return tasks
 
         except Exception as e:
             print(f"Error reading tasks: {e}")
             return None
+    
+
+
     
     def read_at_task_id(self, index):
         """
