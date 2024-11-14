@@ -72,18 +72,17 @@ async def create_task(task: Task):
 async def read_tasks(
     task_uid: str, 
     task_is_completed: Optional[bool] = None,
+    task_created_time_stamp: Optional[str] = None,
     task_list: Optional[str] = None
-):
-    # Determine which tasks to return based on provided filters
-    if task_is_completed is not None:
-        if task_is_completed:
-            returned_tasks = user_db.read_tasks_with_status(task_uid, True, task_list)
-        else:
-            returned_tasks = user_db.read_tasks_with_status(task_uid, False, task_list)
-    else:
-        returned_tasks = user_db.read_all_tasks(task_uid, task_list)
+    ):
 
-    # Convert list of tuples to JSON
+    returned_tasks = user_db.read_all_tasks(
+        task_uid=task_uid,
+        task_list=task_list,
+        task_is_completed=task_is_completed,
+        task_created_time_stamp=task_created_time_stamp
+    )
+
     returned_json = helper_tuple_to_task_base_model(returned_tasks)
     return returned_json
 

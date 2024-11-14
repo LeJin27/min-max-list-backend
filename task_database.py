@@ -135,31 +135,42 @@ class TaskDatabase:
         self.connection.commit()
 
 
-    def read_all_tasks(self, task_uid, task_list=None):
+    def read_all_tasks(self, task_uid, task_list=None, task_is_completed = None,task_created_time_stamp=None):
         """
         Reads all tasks, filtered by uid and optionally by task_list.
         """
         try:
-            if task_list is not None:
-                # Filter by both task_uid and task_list
-                self.cursor.execute(f"""
-                    SELECT * FROM tasks 
-                    WHERE {TASK_UID} = %s AND {TASK_LIST} = %s
-                    """, (task_uid, task_list))
-            else:
-                # Filter only by task_uid
-                self.cursor.execute(f"""
-                    SELECT * FROM tasks 
-                    WHERE {TASK_UID} = %s
-                    """, (task_uid,))
+            # Build the base query
+            query = f"SELECT * FROM tasks WHERE {TASK_UID} = %s"
+            params = [task_uid]
 
-            # Fetch all matching tasks
-            all_tasks = self.cursor.fetchall()
-            return all_tasks
+            # Add optional task_list filter
+            if task_list is not None:
+                query += f" AND {TASK_LIST} = %s"
+                params.append(task_list)
+
+            if task_is_completed is not None:
+                query += f" AND {TASK_IS_COMPLETED} = %s"
+                params.append(task_is_completed)
+
+            # add optional timestamp filter using DATE() to ignore time
+            if task_created_time_stamp is not None:
+                query += f" AND DATE({TASK_CREATED_TIME_STAMP}) = %s"
+                params.append(task_created_time_stamp)
+
+
+            # use custom built query and input user variables
+            self.cursor.execute(query, tuple(params))
+
+            tasks = self.cursor.fetchall()
+            return tasks
 
         except Exception as e:
             print(f"Error reading tasks: {e}")
             return None
+    
+
+
     
     def read_at_task_id(self, index):
         """
@@ -263,184 +274,41 @@ class TaskDatabase:
         self.connection.commit()
 
     def update_task(self, task_id, task_uid, task_list=None, new_desc=None, new_status=None, new_alarm_time=None, new_due_date=None):
-        """
-        Updates a task's description, status, alarm time, or list based on task_id and uid.
-        """
-        try:
-            # Update all fields: description, status, alarm time, due date, and task list
-            if new_desc is not None and new_status is not None and new_alarm_time is not None and new_due_date is not None and task_list is not None:
-                self.cursor.execute(f"""
-                    UPDATE tasks
-                    SET {TASK_DESCRIPTION} = %s, {TASK_IS_COMPLETED} = %s, {TASK_ALARM_TIME} = %s, {TASK_DUE_DATE} = %s, {TASK_LIST} = %s
-                    WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s
-                    """, (new_desc, new_status, new_alarm_time, new_due_date, task_list, task_id, task_uid))
-            
-            # Update description, status, due date, and task list
-            elif new_desc is not None and new_status is not None and new_due_date is not None and task_list is not None:
-                self.cursor.execute(f"""
-                    UPDATE tasks
-                    SET {TASK_DESCRIPTION} = %s, {TASK_IS_COMPLETED} = %s, {TASK_DUE_DATE} = %s, {TASK_LIST} = %s
-                    WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s
-                    """, (new_desc, new_status, new_due_date, task_list, task_id, task_uid))
+        query = []
+        params = []
+    
+        if new_desc is not None:
+            query.append(f"{TASK_DESCRIPTION} = %s")
+            params.append(new_desc)
+        if new_status is not None:
+            query.append(f"{TASK_IS_COMPLETED} = %s")
+            params.append(new_status)
+        if new_alarm_time is not None:
+            params.append(new_alarm_time.astimezone(pytz.UTC) if isinstance(new_alarm_time, datetime) else datetime.fromisoformat(new_alarm_time).astimezone(pytz.UTC))
+            query.append(f"{TASK_ALARM_TIME} = %s")
+        if new_due_date is not None:
+            params.append(new_due_date.astimezone(pytz.UTC) if isinstance(new_due_date, datetime) else datetime.fromisoformat(new_due_date).astimezone(pytz.UTC))
+            query.append(f"{TASK_DUE_DATE} = %s")
+        if task_list is not None:
+            query.append(f"{TASK_LIST} = %s")
+            params.append(task_list)
+    
+        if query:
+            params.extend([task_id, task_uid])
+            query = f"UPDATE tasks SET {', '.join(query)} WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s"
 
-            # Update description, due date, alarm time, and task list
-            elif new_desc is not None and new_due_date is not None and new_alarm_time is not None and task_list is not None:
-                self.cursor.execute(f"""
-                    UPDATE tasks
-                    SET {TASK_DESCRIPTION} = %s, {TASK_ALARM_TIME} = %s, {TASK_DUE_DATE} = %s, {TASK_LIST} = %s
-                    WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s
-                    """, (new_desc, new_alarm_time, new_due_date, task_list, task_id, task_uid))
-
-            # Update status, alarm time, due date, and task list
-            elif new_status is not None and new_alarm_time is not None and new_due_date is not None and task_list is not None:
-                self.cursor.execute(f"""
-                    UPDATE tasks
-                    SET {TASK_IS_COMPLETED} = %s, {TASK_ALARM_TIME} = %s, {TASK_DUE_DATE} = %s, {TASK_LIST} = %s
-                    WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s
-                    """, (new_status, new_alarm_time, new_due_date, task_list, task_id, task_uid))
-
-            # Update description, status, alarm time, and task list
-            elif new_desc is not None and new_status is not None and new_alarm_time is not None and task_list is not None:
-                self.cursor.execute(f"""
-                    UPDATE tasks
-                    SET {TASK_DESCRIPTION} = %s, {TASK_IS_COMPLETED} = %s, {TASK_ALARM_TIME} = %s, {TASK_LIST} = %s
-                    WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s
-                    """, (new_desc, new_status, new_alarm_time, task_list, task_id, task_uid))
-
-            # Update description, due date, and task list
-            elif new_desc is not None and new_due_date is not None and task_list is not None:
-                self.cursor.execute(f"""
-                    UPDATE tasks
-                    SET {TASK_DESCRIPTION} = %s, {TASK_DUE_DATE} = %s, {TASK_LIST} = %s
-                    WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s
-                    """, (new_desc, new_due_date, task_list, task_id, task_uid))
-
-            # Update description, status, and task list
-            elif new_desc is not None and new_status is not None and task_list is not None:
-                self.cursor.execute(f"""
-                    UPDATE tasks
-                    SET {TASK_DESCRIPTION} = %s, {TASK_IS_COMPLETED} = %s, {TASK_LIST} = %s
-                    WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s
-                    """, (new_desc, new_status, task_list, task_id, task_uid))
-
-            # Update description, alarm time, and task list
-            elif new_desc is not None and new_alarm_time is not None and task_list is not None:
-                self.cursor.execute(f"""
-                    UPDATE tasks
-                    SET {TASK_DESCRIPTION} = %s, {TASK_ALARM_TIME} = %s, {TASK_LIST} = %s
-                    WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s
-                    """, (new_desc, new_alarm_time, task_list, task_id, task_uid))
-
-            # Update status, alarm time, and task list
-            elif new_status is not None and new_alarm_time is not None and task_list is not None:
-                self.cursor.execute(f"""
-                    UPDATE tasks
-                    SET {TASK_IS_COMPLETED} = %s, {TASK_ALARM_TIME} = %s, {TASK_LIST} = %s
-                    WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s
-                    """, (new_status, new_alarm_time, task_list, task_id, task_uid))
-
-            # Update only the due date and task list
-            elif new_due_date is not None and task_list is not None:
-                self.cursor.execute(f"""
-                    UPDATE tasks
-                    SET {TASK_DUE_DATE} = %s, {TASK_LIST} = %s
-                    WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s
-                    """, (new_due_date, task_list, task_id, task_uid))
-                
-            elif new_due_date is not None and new_desc is not None:
-                self.cursor.execute(f"""
-                    UPDATE tasks
-                    SET {TASK_DUE_DATE} = %s, {TASK_DESCRIPTION} = %s
-                    WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s
-                    """, (new_due_date, new_desc, task_id, task_uid))
-                
-            elif new_due_date is not None and new_status is not None:
-                self.cursor.execute(f"""
-                    UPDATE tasks
-                    SET {TASK_DUE_DATE} = %s, {TASK_IS_COMPLETED} = %s
-                    WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s
-                    """, (new_due_date, new_status, task_id, task_uid))
-                
-            elif new_due_date is not None and new_alarm_time is not None:
-                self.cursor.execute(f"""
-                    UPDATE tasks
-                    SET {TASK_DUE_DATE} = %s, {TASK_ALARM_TIME} = %s
-                    WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s
-                    """, (new_due_date, new_alarm_time, task_id, task_uid))
-        
-            # Update description and task list
-            elif new_desc is not None and task_list is not None:
-                self.cursor.execute(f"""
-                    UPDATE tasks
-                    SET {TASK_DESCRIPTION} = %s, {TASK_LIST} = %s
-                    WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s
-                    """, (new_desc, task_list, task_id, task_uid))
-
-            # Update status and task list
-            elif new_status is not None and task_list is not None:
-                self.cursor.execute(f"""
-                    UPDATE tasks
-                    SET {TASK_IS_COMPLETED} = %s, {TASK_LIST} = %s
-                    WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s
-                    """, (new_status, task_list, task_id, task_uid))
-
-            # Update alarm time and task list
-            elif new_alarm_time is not None and task_list is not None:
-                self.cursor.execute(f"""
-                    UPDATE tasks
-                    SET {TASK_ALARM_TIME} = %s, {TASK_LIST} = %s
-                    WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s
-                    """, (new_alarm_time, task_list, task_id, task_uid))
-
-            # Update only the task list if provided
-            elif task_list is not None:
-                self.cursor.execute(f"""
-                    UPDATE tasks
-                    SET {TASK_LIST} = %s
-                    WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s
-                    """, (task_list, task_id, task_uid))
-
-            # Existing update cases for single fields
-            elif new_desc is not None:
-                self.cursor.execute(f"""
-                    UPDATE tasks
-                    SET {TASK_DESCRIPTION} = %s
-                    WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s
-                    """, (new_desc, task_id, task_uid))
-
-            elif new_status is not None:
-                self.cursor.execute(f"""
-                    UPDATE tasks
-                    SET {TASK_IS_COMPLETED} = %s
-                    WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s
-                    """, (new_status, task_id, task_uid))
-
-            elif new_alarm_time is not None:
-                self.cursor.execute(f"""
-                    UPDATE tasks
-                    SET {TASK_ALARM_TIME} = %s
-                    WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s
-                    """, (new_alarm_time, task_id, task_uid))
-            
-            elif new_due_date is not None:
-                self.cursor.execute(f"""
-                    UPDATE tasks
-                    SET {TASK_DUE_DATE} = %s
-                    WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s
-                    """, (new_due_date, task_id, task_uid))
-
-            else:
-                print("No changes specified for update.")
-                return
-
+            try:
+                self.cursor.execute(query, tuple(params))
+                self.connection.commit()
+                print("Task updated successfully.")
+            except Exception as e:
+                print(f"Error updating task: {e}")
+                self.connection.rollback()
+        else:
+            print("No fields to update provided.")
             # Commit the transaction and print success message
             self.connection.commit()
             print(f"Task with ID {task_id} and {TASK_UID} {task_uid} updated successfully.")
-
-        except Exception as e:
-            # Handle any errors and rollback changes if necessary
-            print(f"Error updating task with ID {task_id} and {TASK_UID} {task_uid}: {e}")
-            self.connection.rollback()
 
     def __del__(self):
         print("Closing connection")
