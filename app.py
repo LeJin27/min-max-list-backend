@@ -107,3 +107,13 @@ async def update_task(task_id: int, task: Task):
 async def delete_task(task_id: int):
     user_db.delete_task_by_index(task_id)
     return JSONResponse(content={"message": "Task deleted successfully"}, status_code=201)
+
+@app.put("/tasks/delete_alarm/{task_id}")
+async def delete_alarm(task: Task):
+    user_db.delete_task_alarm_by_id(task_id=task.task_id,task_uid=task.task_uid)
+    return JSONResponse(content={"message": "Alarm deleted successfully"}, status_code=201)
+
+@app.put("/tasks/delete_due_date/{task_id}")
+async def delete_due_date(task: Task):
+    user_db.delete_task_due_date_by_id(task_id=task.task_id,task_uid=task.task_uid)
+    return JSONResponse(content={"message": "Due date deleted successfully"}, status_code=201)

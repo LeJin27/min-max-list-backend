@@ -306,39 +306,62 @@ class TaskDatabase:
                 self.connection.rollback()
         else:
             print("No fields to update provided.")
-            # Commit the transaction and print success message
+
+    def delete_task_alarm_by_id(self, task_id, task_uid):
+        query = f"UPDATE tasks SET {TASK_ALARM_TIME} = NULL WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s"
+        values = (task_id, task_uid)
+        
+        try:
+            self.cursor.execute(query, values)
             self.connection.commit()
-            print(f"Task with ID {task_id} and {TASK_UID} {task_uid} updated successfully.")
+            print("Alarm deleted successfully.")
+        except Exception as e:
+            print(f"Error resetting alarm: {e}")
+            self.connection.rollback()
+    
+    def delete_task_due_date_by_id(self, task_id, task_uid):
+        query = f"UPDATE tasks SET {TASK_DUE_DATE} = NULL WHERE {TASK_PRIMARY_KEY} = %s AND {TASK_UID} = %s"
+        values = (task_id, task_uid)
+        
+        try:
+            self.cursor.execute(query, values)
+            self.connection.commit()
+            print("Due date deleted successfully.")
+        except Exception as e:
+            print(f"Error resetting alarm: {e}")
+            self.connection.rollback()
+
+
 
     def __del__(self):
         print("Closing connection")
         self.connection.close()
 
 ## Test Case 1: Create a Task
-# task_db = TaskDatabase(host='localhost', dbname='minmax', user='postgres', password='dog', port=5432)
+task_db = TaskDatabase(host='localhost', dbname='minmax', user='postgres', password='dog', port=5432)
 
 # task_db.delete_all_tasks()
 
-# print("Testing task creation...")
-# task_db.create_task(
-#    task_uid="1234",
-#    task_list="Work",
-#    task_desc="Finish the report",
-#    task_alarm_time=datetime(2024, 11, 7, 14, 30, tzinfo=pytz.UTC),
-#    task_due_date=datetime(2024, 12, 7, 14, 30, tzinfo=pytz.UTC)
-#)
+print("Testing task creation...")
+task_db.create_task(
+    task_uid="1234",
+    task_list="Work",
+    task_desc="Finish the report",
+    task_alarm_time=datetime(2024, 11, 7, 14, 30, tzinfo=pytz.UTC),
+    task_due_date=datetime(2024, 12, 7, 14, 30, tzinfo=pytz.UTC)
+)
 
 ## Test Case 2: Read All Tasks for a given UID
-#print("\nTesting reading tasks by UID...")
-#tasks = task_db.read_all_tasks("1234")
-#print(f"Tasks for UID '1234': {tasks}")
+print("\nTesting reading tasks by UID...")
+tasks = task_db.read_all_tasks("1234")
+print(f"Tasks for UID '1234': {tasks}")
 
-#task_db.update_task(
-#    task_id=13,
-#    task_uid="1234",
-#    task_list="Work",
-#    new_due_date=datetime(2025, 12, 7, 14, 30, tzinfo=pytz.UTC)
-#)
+task_db.update_task(
+    task_id=13,
+    task_uid="1234",
+    task_list="Work",
+    new_due_date=datetime(2024, 11, 7, 14, 30, tzinfo=pytz.UTC)
+)
 
 #print("\nTesting reading tasks by UID after alarm")
 #tasks = task_db.read_all_tasks("1234")
