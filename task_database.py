@@ -133,6 +133,21 @@ class TaskDatabase:
             print(f"Error creating task: {e}")
         
         self.connection.commit()
+    
+    def get_unique_task_lists(self, uid):
+        try:
+            self.cursor.execute(f"""
+                SELECT DISTINCT {TASK_LIST} 
+                FROM tasks 
+                WHERE {TASK_UID} = %s;
+            """, (uid,))
+
+            unique_task_lists = [row[0] for row in self.cursor.fetchall()]
+            return unique_task_lists
+
+        except Exception as e:
+            print("Something went wrong:", e)
+            return []
 
 
     def read_all_tasks(self, task_uid, task_list=None, task_is_completed = None,task_created_time_stamp=None):

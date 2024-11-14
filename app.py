@@ -117,3 +117,9 @@ async def delete_alarm(task: Task):
 async def delete_due_date(task: Task):
     user_db.delete_task_due_date_by_id(task_id=task.task_id,task_uid=task.task_uid)
     return JSONResponse(content={"message": "Due date deleted successfully"}, status_code=201)
+
+
+@app.get("/lists/", response_model=List[str])
+async def read_lists(task_uid:str):
+    unique_lists = user_db.get_unique_task_lists(task_uid)
+    return unique_lists
