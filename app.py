@@ -75,9 +75,9 @@ async def create_task(task: Task):
 async def read_tasks(
     task_uid: str, 
     task_is_completed: Optional[bool] = None,
-    task_created_time_stamp: Optional[bool] = None,
+    task_created_time_stamp: Optional[str] = None,
     task_list: Optional[str] = None
-):
+    ):
 
     returned_tasks = user_db.read_all_tasks(
         task_uid=task_uid,
