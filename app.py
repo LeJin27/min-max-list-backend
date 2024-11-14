@@ -46,9 +46,6 @@ class Task(BaseModel):
     task_alarm_time: Optional[datetime] = None
     task_due_date: Optional[datetime] = None
 
-class Task_List(BaseModel):
-    task_list: str
-
 @app.post("/tasks/")
 async def create_task(task: Task):
     # print(task.task_alarm_time)
@@ -75,18 +72,17 @@ async def create_task(task: Task):
 async def read_tasks(
     task_uid: str, 
     task_is_completed: Optional[bool] = None,
+    task_created_time_stamp: Optional[str] = None,
     task_list: Optional[str] = None
-):
-    # Determine which tasks to return based on provided filters
-    if task_is_completed is not None:
-        if task_is_completed:
-            returned_tasks = user_db.read_tasks_with_status(task_uid, True, task_list)
-        else:
-            returned_tasks = user_db.read_tasks_with_status(task_uid, False, task_list)
-    else:
-        returned_tasks = user_db.read_all_tasks(task_uid, task_list)
+    ):
 
-    # Convert list of tuples to JSON
+    returned_tasks = user_db.read_all_tasks(
+        task_uid=task_uid,
+        task_list=task_list,
+        task_is_completed=task_is_completed,
+        task_created_time_stamp=task_created_time_stamp
+    )
+
     returned_json = helper_tuple_to_task_base_model(returned_tasks)
     return returned_json
 
@@ -97,10 +93,6 @@ async def read_task_id(task_id:int):
     print(returned_json)
     return helper_tuple_to_task_base_model(returned_json)[0]
 
-@app.get("/lists/", response_model=List[str])
-async def read_lists(task_uid:str):
-    unique_lists = user_db.get_unique_task_lists(task_uid)
-    return unique_lists
 
 @app.put("/tasks/{task_id}")
 async def update_task(task_id: int, task: Task):
