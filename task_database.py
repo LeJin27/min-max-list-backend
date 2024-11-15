@@ -150,7 +150,7 @@ class TaskDatabase:
             return []
 
 
-    def read_all_tasks(self, task_uid, task_list=None, task_is_completed = None,task_created_time_stamp=None):
+    def read_all_tasks(self, task_uid, task_list=None, task_is_completed = None,task_created_time_stamp=None, task_due_date = None):
         """
         Reads all tasks, filtered by uid and optionally by task_list.
         """
@@ -173,6 +173,9 @@ class TaskDatabase:
                 query += f" AND DATE({TASK_CREATED_TIME_STAMP}) = %s"
                 params.append(task_created_time_stamp)
 
+            if task_due_date is not None:
+                query += f" AND DATE({TASK_DUE_DATE}) = %s"
+                params.append(task_due_date)
 
             # use custom built query and input user variables
             self.cursor.execute(query, tuple(params))
@@ -357,26 +360,26 @@ task_db = TaskDatabase(host='localhost', dbname='minmax', user='postgres', passw
 
 # task_db.delete_all_tasks()
 
-print("Testing task creation...")
-task_db.create_task(
-    task_uid="1234",
-    task_list="Work",
-    task_desc="Finish the report",
-    task_alarm_time=datetime(2024, 11, 7, 14, 30, tzinfo=pytz.UTC),
-    task_due_date=datetime(2024, 12, 7, 14, 30, tzinfo=pytz.UTC)
-)
-
-## Test Case 2: Read All Tasks for a given UID
-print("\nTesting reading tasks by UID...")
-tasks = task_db.read_all_tasks("1234")
-print(f"Tasks for UID '1234': {tasks}")
-
-task_db.update_task(
-    task_id=13,
-    task_uid="1234",
-    task_list="Work",
-    new_due_date=datetime(2024, 11, 7, 14, 30, tzinfo=pytz.UTC)
-)
+#print("Testing task creation...")
+#task_db.create_task(
+#    task_uid="1234",
+#    task_list="Work",
+#    task_desc="Finish the report",
+#    task_alarm_time=datetime(2024, 11, 7, 14, 30, tzinfo=pytz.UTC),
+#    task_due_date=datetime(2024, 12, 7, 14, 30, tzinfo=pytz.UTC)
+#)
+#
+### Test Case 2: Read All Tasks for a given UID
+#print("\nTesting reading tasks by UID...")
+#tasks = task_db.read_all_tasks("1234")
+#print(f"Tasks for UID '1234': {tasks}")
+#
+#task_db.update_task(
+#    task_id=13,
+#    task_uid="1234",
+#    task_list="Work",
+#    new_due_date=datetime(2024, 11, 7, 14, 30, tzinfo=pytz.UTC)
+#)
 
 #print("\nTesting reading tasks by UID after alarm")
 #tasks = task_db.read_all_tasks("1234")
