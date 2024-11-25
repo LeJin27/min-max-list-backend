@@ -8,9 +8,14 @@ from datetime import datetime
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 import pytz
+import openai
+import os
+
 
 USER_DATABASE_NAME = 'minmax'
 TASK_SCHEMA = ["task_id", "task_uid", "task_list", "task_desc", "task_is_completed", "task_created_time_stamp","task_alarm_time","task_due_date"]
+
+openai.api_key = os.getenv("INPUT KEY HERE")
 
 # convert a list of tuples to base model of task_schema
 def helper_tuple_to_task_base_model(list_of_tuples):
@@ -45,6 +50,22 @@ class Task(BaseModel):
     task_created_time_stamp: datetime = None
     task_alarm_time: Optional[datetime] = None
     task_due_date: Optional[datetime] = None
+
+# request model class for chatgpt
+class Message(BaseModel):
+    message: str
+
+@app.post("/api/chat")
+async def chat(message: Message):
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=[{"role": "user", "content": message.message}],
+        )
+        reply = response.choices[0].message['content']
+        return {"reply": reply}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/tasks/")
 async def create_task(task: Task):
