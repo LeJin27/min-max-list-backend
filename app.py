@@ -8,14 +8,19 @@ from datetime import datetime
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 import pytz
+from openai import OpenAI
 import openai
 import os
+from dotenv import load_dotenv
+load_dotenv()
 
 
 USER_DATABASE_NAME = 'minmax'
 TASK_SCHEMA = ["task_id", "task_uid", "task_list", "task_desc", "task_is_completed", "task_created_time_stamp","task_alarm_time","task_due_date"]
 
-openai.api_key = os.getenv("INPUT KEY HERE")
+
+client = OpenAI()
+print("OpenAI API Key: ", os.getenv("OPENAI_API_KEY"))
 
 # convert a list of tuples to base model of task_schema
 def helper_tuple_to_task_base_model(list_of_tuples):
@@ -57,15 +62,20 @@ class Message(BaseModel):
 
 @app.post("/api/chat")
 async def chat(message: Message):
-    try:
-        response = openai.ChatCompletion.create(
-            model="gpt-4",
+    """Handle ChatGPT API interaction."""
+    try: 
+        # Making the API call with the new method
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
             messages=[{"role": "user", "content": message.message}],
         )
-        reply = response.choices[0].message['content']
+            
+        # Extracting the response message
+        reply = response.choices[0].message.content
+            
         return {"reply": reply}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    except:
+        return{"error"}
 
 @app.post("/tasks/")
 async def create_task(task: Task):
