@@ -26,3 +26,11 @@ fastapi dev app.py
 - app.py: Contains main app along with fastapi crud commands 
 - task_database.py: Main back end interface used in crud commands
 
+### Chatgpt Requirements
+- If you don't want to deal or test chatgpt stuff just comment out 
+: # client = OpenAI()
+
+- add a .env file and put in 
+OPENAI_API_KEY="YOUR KEY HERE"
+chatgpt key from https://platform.openai.com/api-keys
+
