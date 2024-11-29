@@ -32,8 +32,7 @@ fastapi dev app.py
 # client = OpenAI()
 ```
 
-- add a .env file and put in 
+- To use chatbox: get a chatgpt key from https://platform.openai.com/api-keys, add a .env file, and put in:
 ```
 OPENAI_API_KEY="YOUR KEY HERE"
-chatgpt key from https://platform.openai.com/api-keys
 ```
