@@ -9,7 +9,6 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 import pytz
 from openai import OpenAI
-import openai
 import os
 from dotenv import load_dotenv
 load_dotenv()
