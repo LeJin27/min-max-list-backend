@@ -12,6 +12,7 @@ from openai import OpenAI
 import os
 from dotenv import load_dotenv
 load_dotenv()
+import re
 
 
 USER_DATABASE_NAME = 'minmax'
@@ -19,7 +20,7 @@ TASK_SCHEMA = ["task_id", "task_uid", "task_list", "task_desc", "task_is_complet
 
 
 client = OpenAI()
-print("OpenAI API Key: ", os.getenv("OPENAI_API_KEY"))
+# print("OpenAI API Key: ", os.getenv("OPENAI_API_KEY"))
 
 # convert a list of tuples to base model of task_schema
 def helper_tuple_to_task_base_model(list_of_tuples):
@@ -63,16 +64,38 @@ class Message(BaseModel):
 async def chat(message: Message):
     """Handle ChatGPT API interaction."""
     try: 
+
+        modified_message = (
+            "Please break down the following task into numbered tasks and subtasks "
+            "using a hierarchical format. Each main task should be numbered (e.g., 1, 2, 3), "
+            "and each subtask should be numbered accordingly (e.g., 1.1, 1.2, 2.1, 2.2, etc.). "
+            "If needed, feel free to add further levels of detail with a deeper numbering system "
+            "(e.g., 1.1.1, 1.1.2). Make sure each task and subtask is clear and actionable. "
+            + message.message
+        )
         # Making the API call with the new method
         response = client.chat.completions.create(
             model="gpt-4o-mini",
-            messages=[{"role": "user", "content": message.message}],
+            messages=[{"role": "user", "content": modified_message}],
         )
             
         # Extracting the response message
         reply = response.choices[0].message.content
-            
-        return {"reply": reply}
+
+        # \d+\. finds numbers followed by a period
+        # \s* finds any whitespace aftwards
+        # (.*?) grabs any text afterwards it being the content of each task
+        # (?=\n\d+\.|\Z) stops grabbing when it reaches another number followed by period or end of text
+        # numbered_tasks = re.findall(r'\d+\.\s*(.*?)(?=\n\d+\.|\Z)', reply)
+        # numbered_tasks = re.findall(r'\d+\.\s*(.*?)(?=\n\d+\.\s|\Z)', reply)
+        # numbered_tasks = re.findall(r'\d+\.\s*\*?([^*]+?)\s*(?=\n\d+\.|\Z)', reply)
+        # numbered_tasks = re.findall(r'\d+\.\s*([^\n]*)\s*(?=\n\d+\.|\Z)', reply)
+        # numbered_tasks = re.findall(r'(\d+\.\d*|\d+)\.\s*([^\n]+)', reply)
+        numbered_tasks = re.findall(r'(\d+(\.\d+)*\.)\s*([^\n]+)', reply)
+
+
+
+        return {"reply": reply, "tasks": numbered_tasks}
     except:
         return{"error"}
 
