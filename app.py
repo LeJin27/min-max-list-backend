@@ -127,6 +127,7 @@ async def read_tasks(
     task_is_completed: Optional[bool] = None,
     task_created_time_stamp: Optional[str] = None,
     task_due_date: Optional[str] = None,
+    task_alarm_time: Optional[str] = None,
     task_list: Optional[str] = None
     ):
 
@@ -135,7 +136,8 @@ async def read_tasks(
         task_list=task_list,
         task_is_completed=task_is_completed,
         task_created_time_stamp=task_created_time_stamp,
-        task_due_date=task_due_date
+        task_due_date=task_due_date,
+        task_alarm_time=task_alarm_time
     )
 
     returned_json = helper_tuple_to_task_base_model(returned_tasks)

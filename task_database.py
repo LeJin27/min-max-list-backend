@@ -150,7 +150,7 @@ class TaskDatabase:
             return []
 
 
-    def read_all_tasks(self, task_uid, task_list=None, task_is_completed = None,task_created_time_stamp=None, task_due_date = None):
+    def read_all_tasks(self, task_uid, task_list=None, task_is_completed = None,task_created_time_stamp=None, task_due_date = None, task_alarm_time=None):
         """
         Reads all tasks, filtered by uid and optionally by task_list.
         """
@@ -176,6 +176,10 @@ class TaskDatabase:
             if task_due_date is not None:
                 query += f" AND DATE({TASK_DUE_DATE}) = %s"
                 params.append(task_due_date)
+
+            if task_alarm_time is not None:
+                query += f" AND DATE({TASK_ALARM_TIME}) = %s"
+                params.append(task_alarm_time)
 
             # use custom built query and input user variables
             self.cursor.execute(query, tuple(params))
@@ -356,7 +360,7 @@ class TaskDatabase:
         self.connection.close()
 
 ## Test Case 1: Create a Task
-task_db = TaskDatabase(host='localhost', dbname='minmax', user='postgres', password='dog', port=5432)
+#task_db = TaskDatabase(host='localhost', dbname='minmax', user='postgres', password='dog', port=5432)
 
 # task_db.delete_all_tasks()
 
