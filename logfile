@@ -1,0 +1,334 @@
+2024-12-03 16:19:12.046 PST [38802] LOG:  starting PostgreSQL 14.15 (Homebrew) on x86_64-apple-darwin23.6.0, compiled by Apple clang version 16.0.0 (clang-1600.0.26.4), 64-bit
+2024-12-03 16:19:12.048 PST [38802] LOG:  listening on IPv6 address "::1", port 5432
+2024-12-03 16:19:12.048 PST [38802] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2024-12-03 16:19:12.049 PST [38802] LOG:  listening on Unix socket "/tmp/.s.PGSQL.5432"
+2024-12-03 16:19:12.059 PST [38803] LOG:  database system was shut down at 2024-12-03 16:19:07 PST
+2024-12-03 16:19:12.065 PST [38802] LOG:  database system is ready to accept connections
+2024-12-03 16:53:00.177 PST [40122] ERROR:  column "task_uid" does not exist at character 27
+2024-12-03 16:53:00.177 PST [40122] HINT:  Perhaps you meant to reference the column "tasks.task_id".
+2024-12-03 16:53:00.177 PST [40122] STATEMENT:  SELECT * FROM tasks WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2'
+2024-12-03 16:53:00.214 PST [40122] ERROR:  column "task_list" does not exist at character 34
+2024-12-03 16:53:00.214 PST [40122] HINT:  Perhaps you meant to reference the column "tasks.task_id" or the column "tasks.task_desc".
+2024-12-03 16:53:00.214 PST [40122] STATEMENT:  
+	                SELECT DISTINCT task_list 
+	                FROM tasks 
+	                WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2';
+	            
+2024-12-03 16:53:00.215 PST [40122] ERROR:  column "task_uid" does not exist at character 27
+2024-12-03 16:53:00.215 PST [40122] HINT:  Perhaps you meant to reference the column "tasks.task_id".
+2024-12-03 16:53:00.215 PST [40122] STATEMENT:  SELECT * FROM tasks WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2'
+2024-12-03 16:53:00.217 PST [40122] ERROR:  column "task_list" does not exist at character 34
+2024-12-03 16:53:00.217 PST [40122] HINT:  Perhaps you meant to reference the column "tasks.task_id" or the column "tasks.task_desc".
+2024-12-03 16:53:00.217 PST [40122] STATEMENT:  
+	                SELECT DISTINCT task_list 
+	                FROM tasks 
+	                WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2';
+	            
+2024-12-03 16:53:00.219 PST [40122] ERROR:  column "task_uid" does not exist at character 27
+2024-12-03 16:53:00.219 PST [40122] HINT:  Perhaps you meant to reference the column "tasks.task_id".
+2024-12-03 16:53:00.219 PST [40122] STATEMENT:  SELECT * FROM tasks WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2'
+2024-12-03 16:53:00.226 PST [40122] ERROR:  column "task_uid" does not exist at character 27
+2024-12-03 16:53:00.226 PST [40122] HINT:  Perhaps you meant to reference the column "tasks.task_id".
+2024-12-03 16:53:00.226 PST [40122] STATEMENT:  SELECT * FROM tasks WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2'
+2024-12-03 16:53:00.228 PST [40122] ERROR:  column "task_list" does not exist at character 34
+2024-12-03 16:53:00.228 PST [40122] HINT:  Perhaps you meant to reference the column "tasks.task_id" or the column "tasks.task_desc".
+2024-12-03 16:53:00.228 PST [40122] STATEMENT:  
+	                SELECT DISTINCT task_list 
+	                FROM tasks 
+	                WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2';
+	            
+2024-12-03 16:53:00.236 PST [40122] ERROR:  column "task_list" does not exist at character 34
+2024-12-03 16:53:00.236 PST [40122] HINT:  Perhaps you meant to reference the column "tasks.task_id" or the column "tasks.task_desc".
+2024-12-03 16:53:00.236 PST [40122] STATEMENT:  
+	                SELECT DISTINCT task_list 
+	                FROM tasks 
+	                WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2';
+	            
+2024-12-03 16:53:03.111 PST [40122] ERROR:  column "task_uid" of relation "tasks" does not exist at character 36
+2024-12-03 16:53:03.111 PST [40122] STATEMENT:  
+	                INSERT INTO tasks(task_uid, task_list, task_desc, task_is_completed, task_created_time_stamp,task_alarm_time,task_due_date)
+	                VALUES ('c0nuBlib70d3wJqGFxnkYFbvDiP2', 'Tasks', 'task 1', false, CURRENT_TIMESTAMP, NULL, NULL);
+	            
+2024-12-03 16:53:03.111 PST [40122] ERROR:  column "task_uid" does not exist at character 27
+2024-12-03 16:53:03.111 PST [40122] HINT:  Perhaps you meant to reference the column "tasks.task_id".
+2024-12-03 16:53:03.111 PST [40122] STATEMENT:  SELECT * FROM tasks WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2'
+2024-12-03 16:53:03.115 PST [40122] ERROR:  column "task_uid" does not exist at character 27
+2024-12-03 16:53:03.115 PST [40122] HINT:  Perhaps you meant to reference the column "tasks.task_id".
+2024-12-03 16:53:03.115 PST [40122] STATEMENT:  SELECT * FROM tasks WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2'
+2024-12-03 16:53:03.124 PST [40122] ERROR:  column "task_uid" does not exist at character 27
+2024-12-03 16:53:03.124 PST [40122] HINT:  Perhaps you meant to reference the column "tasks.task_id".
+2024-12-03 16:53:03.124 PST [40122] STATEMENT:  SELECT * FROM tasks WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2'
+2024-12-03 16:53:03.131 PST [40122] ERROR:  column "task_list" does not exist at character 34
+2024-12-03 16:53:03.131 PST [40122] HINT:  Perhaps you meant to reference the column "tasks.task_id" or the column "tasks.task_desc".
+2024-12-03 16:53:03.131 PST [40122] STATEMENT:  
+	                SELECT DISTINCT task_list 
+	                FROM tasks 
+	                WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2';
+	            
+2024-12-03 16:57:25.419 PST [40122] ERROR:  column "task_uid" does not exist at character 27
+2024-12-03 16:57:25.419 PST [40122] HINT:  Perhaps you meant to reference the column "tasks.task_id".
+2024-12-03 16:57:25.419 PST [40122] STATEMENT:  SELECT * FROM tasks WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2'
+2024-12-03 16:57:25.421 PST [40122] ERROR:  column "task_list" does not exist at character 34
+2024-12-03 16:57:25.421 PST [40122] HINT:  Perhaps you meant to reference the column "tasks.task_id" or the column "tasks.task_desc".
+2024-12-03 16:57:25.421 PST [40122] STATEMENT:  
+	                SELECT DISTINCT task_list 
+	                FROM tasks 
+	                WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2';
+	            
+2024-12-03 16:57:25.423 PST [40122] ERROR:  column "task_uid" does not exist at character 27
+2024-12-03 16:57:25.423 PST [40122] HINT:  Perhaps you meant to reference the column "tasks.task_id".
+2024-12-03 16:57:25.423 PST [40122] STATEMENT:  SELECT * FROM tasks WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2'
+2024-12-03 16:57:25.425 PST [40122] ERROR:  column "task_uid" does not exist at character 27
+2024-12-03 16:57:25.425 PST [40122] HINT:  Perhaps you meant to reference the column "tasks.task_id".
+2024-12-03 16:57:25.425 PST [40122] STATEMENT:  SELECT * FROM tasks WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2'
+2024-12-03 16:57:25.432 PST [40122] ERROR:  column "task_uid" does not exist at character 27
+2024-12-03 16:57:25.432 PST [40122] HINT:  Perhaps you meant to reference the column "tasks.task_id".
+2024-12-03 16:57:25.432 PST [40122] STATEMENT:  SELECT * FROM tasks WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2'
+2024-12-03 16:57:25.434 PST [40122] ERROR:  column "task_list" does not exist at character 34
+2024-12-03 16:57:25.434 PST [40122] HINT:  Perhaps you meant to reference the column "tasks.task_id" or the column "tasks.task_desc".
+2024-12-03 16:57:25.434 PST [40122] STATEMENT:  
+	                SELECT DISTINCT task_list 
+	                FROM tasks 
+	                WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2';
+	            
+2024-12-03 16:57:25.441 PST [40122] ERROR:  column "task_list" does not exist at character 34
+2024-12-03 16:57:25.441 PST [40122] HINT:  Perhaps you meant to reference the column "tasks.task_id" or the column "tasks.task_desc".
+2024-12-03 16:57:25.441 PST [40122] STATEMENT:  
+	                SELECT DISTINCT task_list 
+	                FROM tasks 
+	                WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2';
+	            
+2024-12-03 16:57:29.495 PST [40122] ERROR:  column "task_uid" of relation "tasks" does not exist at character 36
+2024-12-03 16:57:29.495 PST [40122] STATEMENT:  
+	                INSERT INTO tasks(task_uid, task_list, task_desc, task_is_completed, task_created_time_stamp,task_alarm_time,task_due_date)
+	                VALUES ('c0nuBlib70d3wJqGFxnkYFbvDiP2', 'Tasks', 'task 1', false, CURRENT_TIMESTAMP, NULL, NULL);
+	            
+2024-12-03 16:57:29.496 PST [40122] ERROR:  column "task_uid" does not exist at character 27
+2024-12-03 16:57:29.496 PST [40122] HINT:  Perhaps you meant to reference the column "tasks.task_id".
+2024-12-03 16:57:29.496 PST [40122] STATEMENT:  SELECT * FROM tasks WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2'
+2024-12-03 16:57:29.500 PST [40122] ERROR:  column "task_uid" does not exist at character 27
+2024-12-03 16:57:29.500 PST [40122] HINT:  Perhaps you meant to reference the column "tasks.task_id".
+2024-12-03 16:57:29.500 PST [40122] STATEMENT:  SELECT * FROM tasks WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2'
+2024-12-03 16:57:29.508 PST [40122] ERROR:  column "task_uid" does not exist at character 27
+2024-12-03 16:57:29.508 PST [40122] HINT:  Perhaps you meant to reference the column "tasks.task_id".
+2024-12-03 16:57:29.508 PST [40122] STATEMENT:  SELECT * FROM tasks WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2'
+2024-12-03 16:57:29.516 PST [40122] ERROR:  column "task_list" does not exist at character 34
+2024-12-03 16:57:29.516 PST [40122] HINT:  Perhaps you meant to reference the column "tasks.task_id" or the column "tasks.task_desc".
+2024-12-03 16:57:29.516 PST [40122] STATEMENT:  
+	                SELECT DISTINCT task_list 
+	                FROM tasks 
+	                WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2';
+	            
+2024-12-03 16:58:33.493 PST [38802] LOG:  received fast shutdown request
+2024-12-03 16:58:33.494 PST [38802] LOG:  aborting any active transactions
+2024-12-03 16:58:33.496 PST [38802] LOG:  background worker "logical replication launcher" (PID 38809) exited with exit code 1
+2024-12-03 16:58:33.496 PST [38804] LOG:  shutting down
+2024-12-03 16:58:33.513 PST [38802] LOG:  database system is shut down
+2024-12-03 16:58:35.591 PST [58386] LOG:  starting PostgreSQL 14.15 (Homebrew) on x86_64-apple-darwin23.6.0, compiled by Apple clang version 16.0.0 (clang-1600.0.26.4), 64-bit
+2024-12-03 16:58:35.593 PST [58386] LOG:  listening on IPv6 address "::1", port 5432
+2024-12-03 16:58:35.593 PST [58386] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2024-12-03 16:58:35.594 PST [58386] LOG:  listening on Unix socket "/tmp/.s.PGSQL.5432"
+2024-12-03 16:58:35.606 PST [58387] LOG:  database system was shut down at 2024-12-03 16:58:33 PST
+2024-12-03 16:58:35.613 PST [58386] LOG:  database system is ready to accept connections
+2024-12-03 16:59:55.999 PST [58507] ERROR:  column "task_uid" does not exist at character 27
+2024-12-03 16:59:55.999 PST [58507] HINT:  Perhaps you meant to reference the column "tasks.task_id".
+2024-12-03 16:59:55.999 PST [58507] STATEMENT:  SELECT * FROM tasks WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2'
+2024-12-03 16:59:56.013 PST [58507] ERROR:  column "task_list" does not exist at character 34
+2024-12-03 16:59:56.013 PST [58507] HINT:  Perhaps you meant to reference the column "tasks.task_id" or the column "tasks.task_desc".
+2024-12-03 16:59:56.013 PST [58507] STATEMENT:  
+	                SELECT DISTINCT task_list 
+	                FROM tasks 
+	                WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2';
+	            
+2024-12-03 16:59:56.014 PST [58507] ERROR:  column "task_uid" does not exist at character 27
+2024-12-03 16:59:56.014 PST [58507] HINT:  Perhaps you meant to reference the column "tasks.task_id".
+2024-12-03 16:59:56.014 PST [58507] STATEMENT:  SELECT * FROM tasks WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2'
+2024-12-03 16:59:56.024 PST [58507] ERROR:  column "task_uid" does not exist at character 27
+2024-12-03 16:59:56.024 PST [58507] HINT:  Perhaps you meant to reference the column "tasks.task_id".
+2024-12-03 16:59:56.024 PST [58507] STATEMENT:  SELECT * FROM tasks WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2'
+2024-12-03 16:59:56.027 PST [58507] ERROR:  column "task_uid" does not exist at character 27
+2024-12-03 16:59:56.027 PST [58507] HINT:  Perhaps you meant to reference the column "tasks.task_id".
+2024-12-03 16:59:56.027 PST [58507] STATEMENT:  SELECT * FROM tasks WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2'
+2024-12-03 16:59:56.047 PST [58507] ERROR:  column "task_list" does not exist at character 34
+2024-12-03 16:59:56.047 PST [58507] HINT:  Perhaps you meant to reference the column "tasks.task_id" or the column "tasks.task_desc".
+2024-12-03 16:59:56.047 PST [58507] STATEMENT:  
+	                SELECT DISTINCT task_list 
+	                FROM tasks 
+	                WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2';
+	            
+2024-12-03 17:00:52.111 PST [58507] ERROR:  column "task_uid" of relation "tasks" does not exist at character 36
+2024-12-03 17:00:52.111 PST [58507] STATEMENT:  
+	                INSERT INTO tasks(task_uid, task_list, task_desc, task_is_completed, task_created_time_stamp,task_alarm_time,task_due_date)
+	                VALUES ('c0nuBlib70d3wJqGFxnkYFbvDiP2', 'Tasks', 'task', false, CURRENT_TIMESTAMP, NULL, NULL);
+	            
+2024-12-03 17:00:52.111 PST [58507] ERROR:  column "task_uid" does not exist at character 27
+2024-12-03 17:00:52.111 PST [58507] HINT:  Perhaps you meant to reference the column "tasks.task_id".
+2024-12-03 17:00:52.111 PST [58507] STATEMENT:  SELECT * FROM tasks WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2'
+2024-12-03 17:00:52.116 PST [58507] ERROR:  column "task_uid" does not exist at character 27
+2024-12-03 17:00:52.116 PST [58507] HINT:  Perhaps you meant to reference the column "tasks.task_id".
+2024-12-03 17:00:52.116 PST [58507] STATEMENT:  SELECT * FROM tasks WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2'
+2024-12-03 17:00:52.127 PST [58507] ERROR:  column "task_uid" does not exist at character 27
+2024-12-03 17:00:52.127 PST [58507] HINT:  Perhaps you meant to reference the column "tasks.task_id".
+2024-12-03 17:00:52.127 PST [58507] STATEMENT:  SELECT * FROM tasks WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2'
+2024-12-03 17:00:52.138 PST [58507] ERROR:  column "task_list" does not exist at character 34
+2024-12-03 17:00:52.138 PST [58507] HINT:  Perhaps you meant to reference the column "tasks.task_id" or the column "tasks.task_desc".
+2024-12-03 17:00:52.138 PST [58507] STATEMENT:  
+	                SELECT DISTINCT task_list 
+	                FROM tasks 
+	                WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2';
+	            
+2024-12-03 17:01:49.636 PST [58507] ERROR:  column "task_uid" does not exist at character 27
+2024-12-03 17:01:49.636 PST [58507] HINT:  Perhaps you meant to reference the column "tasks.task_id".
+2024-12-03 17:01:49.636 PST [58507] STATEMENT:  SELECT * FROM tasks WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2'
+2024-12-03 17:01:49.637 PST [58507] ERROR:  column "task_list" does not exist at character 34
+2024-12-03 17:01:49.637 PST [58507] HINT:  Perhaps you meant to reference the column "tasks.task_id" or the column "tasks.task_desc".
+2024-12-03 17:01:49.637 PST [58507] STATEMENT:  
+	                SELECT DISTINCT task_list 
+	                FROM tasks 
+	                WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2';
+	            
+2024-12-03 17:01:49.639 PST [58507] ERROR:  column "task_uid" does not exist at character 27
+2024-12-03 17:01:49.639 PST [58507] HINT:  Perhaps you meant to reference the column "tasks.task_id".
+2024-12-03 17:01:49.639 PST [58507] STATEMENT:  SELECT * FROM tasks WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2'
+2024-12-03 17:01:49.657 PST [58507] ERROR:  column "task_uid" does not exist at character 27
+2024-12-03 17:01:49.657 PST [58507] HINT:  Perhaps you meant to reference the column "tasks.task_id".
+2024-12-03 17:01:49.657 PST [58507] STATEMENT:  SELECT * FROM tasks WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2'
+2024-12-03 17:01:49.659 PST [58507] ERROR:  column "task_uid" does not exist at character 27
+2024-12-03 17:01:49.659 PST [58507] HINT:  Perhaps you meant to reference the column "tasks.task_id".
+2024-12-03 17:01:49.659 PST [58507] STATEMENT:  SELECT * FROM tasks WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2'
+2024-12-03 17:01:49.661 PST [58507] ERROR:  column "task_list" does not exist at character 34
+2024-12-03 17:01:49.661 PST [58507] HINT:  Perhaps you meant to reference the column "tasks.task_id" or the column "tasks.task_desc".
+2024-12-03 17:01:49.661 PST [58507] STATEMENT:  
+	                SELECT DISTINCT task_list 
+	                FROM tasks 
+	                WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2';
+	            
+2024-12-03 17:01:49.670 PST [58507] ERROR:  column "task_list" does not exist at character 34
+2024-12-03 17:01:49.670 PST [58507] HINT:  Perhaps you meant to reference the column "tasks.task_id" or the column "tasks.task_desc".
+2024-12-03 17:01:49.670 PST [58507] STATEMENT:  
+	                SELECT DISTINCT task_list 
+	                FROM tasks 
+	                WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2';
+	            
+2024-12-03 17:01:52.484 PST [58507] ERROR:  column "task_uid" of relation "tasks" does not exist at character 36
+2024-12-03 17:01:52.484 PST [58507] STATEMENT:  
+	                INSERT INTO tasks(task_uid, task_list, task_desc, task_is_completed, task_created_time_stamp,task_alarm_time,task_due_date)
+	                VALUES ('c0nuBlib70d3wJqGFxnkYFbvDiP2', 'Tasks', 'hello', false, CURRENT_TIMESTAMP, NULL, NULL);
+	            
+2024-12-03 17:01:52.485 PST [58507] ERROR:  column "task_uid" does not exist at character 27
+2024-12-03 17:01:52.485 PST [58507] HINT:  Perhaps you meant to reference the column "tasks.task_id".
+2024-12-03 17:01:52.485 PST [58507] STATEMENT:  SELECT * FROM tasks WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2'
+2024-12-03 17:01:52.488 PST [58507] ERROR:  column "task_uid" does not exist at character 27
+2024-12-03 17:01:52.488 PST [58507] HINT:  Perhaps you meant to reference the column "tasks.task_id".
+2024-12-03 17:01:52.488 PST [58507] STATEMENT:  SELECT * FROM tasks WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2'
+2024-12-03 17:01:52.498 PST [58507] ERROR:  column "task_uid" does not exist at character 27
+2024-12-03 17:01:52.498 PST [58507] HINT:  Perhaps you meant to reference the column "tasks.task_id".
+2024-12-03 17:01:52.498 PST [58507] STATEMENT:  SELECT * FROM tasks WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2'
+2024-12-03 17:01:52.506 PST [58507] ERROR:  column "task_list" does not exist at character 34
+2024-12-03 17:01:52.506 PST [58507] HINT:  Perhaps you meant to reference the column "tasks.task_id" or the column "tasks.task_desc".
+2024-12-03 17:01:52.506 PST [58507] STATEMENT:  
+	                SELECT DISTINCT task_list 
+	                FROM tasks 
+	                WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2';
+	            
+2024-12-03 17:02:10.931 PST [58507] ERROR:  column "task_uid" of relation "tasks" does not exist at character 36
+2024-12-03 17:02:10.931 PST [58507] STATEMENT:  
+	                INSERT INTO tasks(task_uid, task_list, task_desc, task_is_completed, task_created_time_stamp,task_alarm_time,task_due_date)
+	                VALUES ('c0nuBlib70d3wJqGFxnkYFbvDiP2', 'Tasks', 'jhkjh', false, CURRENT_TIMESTAMP, NULL, NULL);
+	            
+2024-12-03 17:02:10.932 PST [58507] ERROR:  column "task_uid" does not exist at character 27
+2024-12-03 17:02:10.932 PST [58507] HINT:  Perhaps you meant to reference the column "tasks.task_id".
+2024-12-03 17:02:10.932 PST [58507] STATEMENT:  SELECT * FROM tasks WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2'
+2024-12-03 17:02:10.937 PST [58507] ERROR:  column "task_uid" does not exist at character 27
+2024-12-03 17:02:10.937 PST [58507] HINT:  Perhaps you meant to reference the column "tasks.task_id".
+2024-12-03 17:02:10.937 PST [58507] STATEMENT:  SELECT * FROM tasks WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2'
+2024-12-03 17:02:10.947 PST [58507] ERROR:  column "task_uid" does not exist at character 27
+2024-12-03 17:02:10.947 PST [58507] HINT:  Perhaps you meant to reference the column "tasks.task_id".
+2024-12-03 17:02:10.947 PST [58507] STATEMENT:  SELECT * FROM tasks WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2'
+2024-12-03 17:02:10.956 PST [58507] ERROR:  column "task_list" does not exist at character 34
+2024-12-03 17:02:10.956 PST [58507] HINT:  Perhaps you meant to reference the column "tasks.task_id" or the column "tasks.task_desc".
+2024-12-03 17:02:10.956 PST [58507] STATEMENT:  
+	                SELECT DISTINCT task_list 
+	                FROM tasks 
+	                WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2';
+	            
+2024-12-03 18:10:26.820 PST [58386] LOG:  received fast shutdown request
+2024-12-03 18:10:26.821 PST [58386] LOG:  aborting any active transactions
+2024-12-03 18:10:26.823 PST [58386] LOG:  background worker "logical replication launcher" (PID 58393) exited with exit code 1
+2024-12-03 18:10:26.823 PST [58388] LOG:  shutting down
+2024-12-03 18:10:26.837 PST [58386] LOG:  database system is shut down
+2024-12-03 18:15:19.672 PST [85743] LOG:  starting PostgreSQL 14.15 (Homebrew) on x86_64-apple-darwin23.6.0, compiled by Apple clang version 16.0.0 (clang-1600.0.26.4), 64-bit
+2024-12-03 18:15:19.674 PST [85743] LOG:  listening on IPv6 address "::1", port 5432
+2024-12-03 18:15:19.674 PST [85743] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2024-12-03 18:15:19.675 PST [85743] LOG:  listening on Unix socket "/tmp/.s.PGSQL.5432"
+2024-12-03 18:15:19.680 PST [85744] LOG:  database system was shut down at 2024-12-03 18:15:15 PST
+2024-12-03 18:15:19.685 PST [85743] LOG:  database system is ready to accept connections
+2024-12-03 18:16:32.269 PST [86280] ERROR:  column "task_uid" does not exist at character 27
+2024-12-03 18:16:32.269 PST [86280] HINT:  Perhaps you meant to reference the column "tasks.task_id".
+2024-12-03 18:16:32.269 PST [86280] STATEMENT:  SELECT * FROM tasks WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2'
+2024-12-03 18:16:32.287 PST [86280] ERROR:  column "task_list" does not exist at character 34
+2024-12-03 18:16:32.287 PST [86280] HINT:  Perhaps you meant to reference the column "tasks.task_id" or the column "tasks.task_desc".
+2024-12-03 18:16:32.287 PST [86280] STATEMENT:  
+	                SELECT DISTINCT task_list 
+	                FROM tasks 
+	                WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2';
+	            
+2024-12-03 18:16:32.289 PST [86280] ERROR:  column "task_uid" does not exist at character 27
+2024-12-03 18:16:32.289 PST [86280] HINT:  Perhaps you meant to reference the column "tasks.task_id".
+2024-12-03 18:16:32.289 PST [86280] STATEMENT:  SELECT * FROM tasks WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2'
+2024-12-03 18:16:32.291 PST [86280] ERROR:  column "task_list" does not exist at character 34
+2024-12-03 18:16:32.291 PST [86280] HINT:  Perhaps you meant to reference the column "tasks.task_id" or the column "tasks.task_desc".
+2024-12-03 18:16:32.291 PST [86280] STATEMENT:  
+	                SELECT DISTINCT task_list 
+	                FROM tasks 
+	                WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2';
+	            
+2024-12-03 18:16:32.341 PST [86280] ERROR:  column "task_uid" does not exist at character 27
+2024-12-03 18:16:32.341 PST [86280] HINT:  Perhaps you meant to reference the column "tasks.task_id".
+2024-12-03 18:16:32.341 PST [86280] STATEMENT:  SELECT * FROM tasks WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2'
+2024-12-03 18:16:32.343 PST [86280] ERROR:  column "task_list" does not exist at character 34
+2024-12-03 18:16:32.343 PST [86280] HINT:  Perhaps you meant to reference the column "tasks.task_id" or the column "tasks.task_desc".
+2024-12-03 18:16:32.343 PST [86280] STATEMENT:  
+	                SELECT DISTINCT task_list 
+	                FROM tasks 
+	                WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2';
+	            
+2024-12-03 18:16:32.346 PST [86280] ERROR:  column "task_list" does not exist at character 34
+2024-12-03 18:16:32.346 PST [86280] HINT:  Perhaps you meant to reference the column "tasks.task_id" or the column "tasks.task_desc".
+2024-12-03 18:16:32.346 PST [86280] STATEMENT:  
+	                SELECT DISTINCT task_list 
+	                FROM tasks 
+	                WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2';
+	            
+2024-12-03 18:16:32.353 PST [86280] ERROR:  column "task_uid" does not exist at character 27
+2024-12-03 18:16:32.353 PST [86280] HINT:  Perhaps you meant to reference the column "tasks.task_id".
+2024-12-03 18:16:32.353 PST [86280] STATEMENT:  SELECT * FROM tasks WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2'
+2024-12-03 18:17:00.214 PST [86280] ERROR:  column "task_uid" of relation "tasks" does not exist at character 36
+2024-12-03 18:17:00.214 PST [86280] STATEMENT:  
+	                INSERT INTO tasks(task_uid, task_list, task_desc, task_is_completed, task_created_time_stamp,task_alarm_time,task_due_date)
+	                VALUES ('c0nuBlib70d3wJqGFxnkYFbvDiP2', 'Tasks', 'task 1', false, CURRENT_TIMESTAMP, NULL, NULL);
+	            
+2024-12-03 18:17:00.214 PST [86280] ERROR:  column "task_uid" does not exist at character 27
+2024-12-03 18:17:00.214 PST [86280] HINT:  Perhaps you meant to reference the column "tasks.task_id".
+2024-12-03 18:17:00.214 PST [86280] STATEMENT:  SELECT * FROM tasks WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2'
+2024-12-03 18:17:00.218 PST [86280] ERROR:  column "task_uid" does not exist at character 27
+2024-12-03 18:17:00.218 PST [86280] HINT:  Perhaps you meant to reference the column "tasks.task_id".
+2024-12-03 18:17:00.218 PST [86280] STATEMENT:  SELECT * FROM tasks WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2'
+2024-12-03 18:17:00.230 PST [86280] ERROR:  column "task_uid" does not exist at character 27
+2024-12-03 18:17:00.230 PST [86280] HINT:  Perhaps you meant to reference the column "tasks.task_id".
+2024-12-03 18:17:00.230 PST [86280] STATEMENT:  SELECT * FROM tasks WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2'
+2024-12-03 18:17:00.239 PST [86280] ERROR:  column "task_list" does not exist at character 34
+2024-12-03 18:17:00.239 PST [86280] HINT:  Perhaps you meant to reference the column "tasks.task_id" or the column "tasks.task_desc".
+2024-12-03 18:17:00.239 PST [86280] STATEMENT:  
+	                SELECT DISTINCT task_list 
+	                FROM tasks 
+	                WHERE task_uid = 'c0nuBlib70d3wJqGFxnkYFbvDiP2';
+	            
+2024-12-03 18:21:17.367 PST [87970] ERROR:  database "minmax" is being accessed by other users
+2024-12-03 18:21:17.367 PST [87970] DETAIL:  There are 4 other sessions using the database.
+2024-12-03 18:21:17.367 PST [87970] STATEMENT:  DROP DATABASE minmax;
+2024-12-03 18:21:31.405 PST [86263] FATAL:  terminating connection due to administrator command
+2024-12-03 18:21:31.405 PST [86279] FATAL:  terminating connection due to administrator command
+2024-12-03 18:21:31.405 PST [86264] FATAL:  terminating connection due to administrator command
+2024-12-03 18:21:31.405 PST [86280] FATAL:  terminating connection due to administrator command
+2024-12-03 18:22:15.741 PST [88612] FATAL:  database "minmax" does not exist
