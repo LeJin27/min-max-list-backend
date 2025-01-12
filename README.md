@@ -1,10 +1,12 @@
 # min-max-list-backend
 
 
+
+
 ### Description
 - Provides database management with postgresql
 - Provides endpoints for frontend to use using fastapi
-
+- URL for frontend https://github.com/bemjense/min-max-list-frontend
 ### Installation Requirements
 
 ```
